@@ -1,0 +1,93 @@
+.navbar-custom header {
+  max-width: 100% !important;
+}
+
+/* Đặt kiểu cho bảng Markdown */
+.markdown-table {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  margin: 20px 0;
+  font-size: 14px;
+}
+
+/* Kiểu cho các ô của bảng */
+.markdown-table th,
+.markdown-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+/* Kiểu cho tiêu đề của bảng */
+.markdown-table th {
+  background-color: #3d3d3d;
+  font-weight: bold;
+}
+
+/* Kiểu cho hàng khi hover */
+.markdown-table tr:hover {
+  background-color: #f1f1f1;
+}
+
+.custom-width > div {
+  max-width: none;
+}
+
+.border-custom-none > div {
+  border: none;
+}
+
+.ql-custom > div {
+  border: none !important;
+}
+
+/* Thay đổi màu của các icon */
+.ql-toolbar .ql-stroke {
+  stroke: #00bcd4 !important; /* Màu viền của icon */
+}
+
+.ql-toolbar .ql-fill {
+  fill: #00bcd4 !important; /* Màu nền của icon */
+}
+
+/* Thay đổi màu khi hover */
+.ql-toolbar button:hover .ql-stroke,
+.ql-toolbar button:hover .ql-fill {
+  stroke: #ff5722 !important; /* Màu viền khi hover */
+  fill: #ff5722 !important; /* Màu nền khi hover */
+}
+
+/* Chỉnh màu cho trạng thái active */
+.ql-toolbar button.ql-active .ql-stroke,
+.ql-toolbar button.ql-active .ql-fill {
+  stroke: #4caf50 !important; /* Màu viền khi active */
+  fill: #4caf50 !important; /* Màu nền khi active */
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.markdown-content {
+  max-width: 100%;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  white-space: pre-wrap;
+}
+
+.markdown-content code {
+  background-color: darkgray;
+  padding: 4px 6px;
+  border-radius: 4px;
+}

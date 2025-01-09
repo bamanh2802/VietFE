@@ -1,0 +1,94 @@
+{
+  "LandingPage": {
+    "HeroTitle": "Công cụ AI",
+    "Home": "Trang chủ",
+    "Feature": "Tính năng",
+    "Pricing": "Thanh toán",
+    "HeroDescription": "Tổ chức, phân tích và chia sẻ kiến thức hiệu quả với sức mạnh AI.",
+
+
+    "FeatureTitle": "Những tính năng mạnh mẽ giúp bạn quản lý toàn bộ kiến thức của mình.",
+    "FeatureDescription": "Tích hợp ngay trong không gian làm việc của bạn, Viet sẵn sàng động não, tóm tắt, hỗ trợ viết và tìm kiếm mọi thứ bạn cần.",
+    "FeatureCard1Title": "Dễ dàng chia sẻ",
+    "FeatureCard1Description": "Chia sẻ công việc của bạn chỉ với 1 đường link",
+    "FeatureCard2Title": "Hợp tác dự án",
+    "FeatureCard2Description": "Làm việc cùng nhau với dự án được chia sẻ",
+    "FeatureCard3Title": "Hỗ trợ của AI",
+    "FeatureCard3Description": "Tận dụng trí tuệ tập thể với sự hỗ trợ của AI",
+    "FeatureCard4Title": "Trao đổi kiến thức",
+    "FeatureCard4Description": "Học hỏi từ người khác và đóng góp kiến thức chuyên môn của bạn",
+    
+    "FeaturePreviewTitle": "Những ứng dụng tiện lợi để làm việc cùng",
+    "FeaturePreviewCard1Title": "Trình chỉnh sửa ghi chú linh hoạt: Sự linh hoạt trong tầm tay bạn",
+    "FeaturePreviewCard1Description": "Từ những danh sách đơn giản đến tài liệu chi tiết, trình chỉnh sửa dễ sử dụng của chúng tôi giúp bạn quản lý ghi chú một cách nhanh chóng và hiệu quả. Khám phá sự sáng tạo và tổ chức một cách dễ dàng.",
+    "FeaturePreviewCard2Title": "Tiện ích",
+    "FeaturePreviewCard2Description": "Mỗi phần của trình chỉnh sửa sẽ hiển thị các tùy chọn phù hợp khi bạn nhấn chuột phải vào các mục như trò chuyện, menu, thanh bên và trang chủ",
+    "FeaturePreviewCard3Title": "Tải lên, chia sẻ và xem trước bất kỳ tệp tin nào",
+    "FeaturePreviewCard3Description": "Tải lên tệp tin dễ dàng, khám phá nội dung với những thông tin chuyên sâu từ AI, và tham gia vào các cuộc trò chuyện với chatbot dựa trên dữ liệu. Chia sẻ tài liệu một cách an toàn và tối ưu hóa công việc nhóm một cách hiệu quả",
+    
+    
+    "FeedbackTitle": "Khách hàng của chúng tôi nói gì",
+    "FeedbackDescription": "Khám phá tác động mà chúng tôi đã tạo ra qua những câu chuyện từ khách hàng. Những câu chuyện thành công, hợp tác và đổi mới thực tế, thể hiện giá trị mà chúng tôi mang lại cho các dự án của họ",
+    "FeedbackCardCard1Title": "Viet đã thực sự thay đổi cách chúng tôi tiếp cận quản lý kiến thức. Khả năng tích hợp liền mạch nhiều tài liệu và truy xuất thông tin quan trọng ngay lập tức đã cải thiện đáng kể quy trình làm việc của chúng tôi. Giống như có một trợ lý nghiên cứu cá nhân luôn sẵn sàng 24/7!",
+    "FeedbackCardCard2Title": "Công cụ trò chuyện hỗ trợ AI trong Viet đã giúp đội ngũ của chúng tôi hợp tác và chia sẻ kiến thức dễ dàng hơn bao giờ hết. Với khả năng tìm kiếm và trích xuất thông tin từ tài liệu nhanh chóng, năng suất làm việc của chúng tôi đã tăng vọt!",
+    "FeedbackCardCard3Title": "Là một nhà nghiên cứu, tôi đặc biệt ấn tượng với giao diện người dùng của Viet. Khả năng gắn thẻ và tổ chức thông tin một cách trực quan giúp quá trình quản lý và nghiên cứu kiến thức trở nên dễ dàng hơn bao giờ hết. Đây thực sự là một bước tiến đột phá!"
+  },
+
+  "SigninForm": {
+    "Welcome!": "Xin chào",
+    "Not a member yet?": "Chưa có tài khoản?",
+    "Register now": "Đăng ký ngay",
+    "Log in": "Đăng nhập",
+    "LoggingIn..." : "Đang đăng nhập",
+    "Log in now": "Đăng nhập ngay",
+    "Forgot your password?": "Quên mật khẩu?",
+    "Or sign in with": "Hoặc đăng nhập với",
+    "Not a member": "Chưa có tài khoản? đăng ký",
+    "Already have an account?": "Đã có tài khoản?",
+    "Sign in": "Đăng nhập",
+    "RegisterTitle": "Đăng ký với email của bạn",
+    "CreateAccount": "Tạo tài khoản",
+    "CreatingAccount": "Đang tạo...",
+    "OrRegisterWith": "Hoặc đăng ký với",
+    "AskForLogin": "Bạn đã có tài khoản? Đăng nhập",
+    "AgreeWithTerm": "Tôi đồng ý với",
+    "TermAndConditions": "Điều Khoản và Điều Kiện"
+  },
+
+  "Home": {
+    "QuickAccess": "Truy cập nhanh",
+    "NewProject": "Dự án mới",
+    "Recent": "Gần đây",
+    "AllProjects": "Tất cả dự án",
+    "RecentProject": "Dự án gần đây",
+    "RecentDocuments": "Tài liệu gần đây",
+    "RecentConversations": "Cuộc trò chuyện gần đây",
+    "CreateProject": "Tạo dự án",
+    "CreateProjectDescription": "Tạo dự án mới với chỉ 1 bước",
+    "CreateProjectPlaceholder": "Tên của dự án",
+    "EditProject": "Sửa Dự Án",
+    "EditProjectDescription": "Sửa tên của dự án",
+    "DeleteProjectTitle": "Do you really want to delete",
+    "DeleteProjectDescription": "This action cannot be undone. Project cannot be restored."
+  },
+
+
+  "Global": {
+    "Search": "Tìm kiếm",
+    "Projects": "Dự án",
+    "Documents": "Tài liệu",
+    "Conversations": "Cuộc trò chuyện",
+    "Rename": "Đổi tên",
+    "Delete": "Xóa",
+    "Cancel": "Hủy",
+    "Create": "Tạo",
+    "Name": "Tên",
+    "Save": "Lưu",
+    "Notes": "Ghi chú",
+    "Home": "Trang chủ",
+    "Add": "Thêm",
+    "Images": "Hình ảnh",
+    "New": "Mới",
+    "Detail": "Chi tiết"
+  }
+}
