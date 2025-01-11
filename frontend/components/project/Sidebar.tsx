@@ -178,7 +178,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 
       if (id.startsWith("doc-")) {
         console.log(`Deleting document with id ${id}`);
-        data = await deleteDocument(id);
+        data = await deleteDocument(id, project_id as string);
         updatedDocuments();
       } else if (id.startsWith("note-")) {
         console.log(`Deleting note with id ${id}`);

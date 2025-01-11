@@ -189,7 +189,7 @@ const TextInteraction: React.FC<TextInteractionProps> = ({handleActionDocument, 
       <Tabs aria-label="Raw" variant="underlined">
         <Tab key="raw" title={d('Raw')}>
           <div ref={textRef} className="p-4 rounded relative leading-relaxed">
-          <div className="border h-[100%-100px]">
+          <div className="border-none h-[100%-100px]">
           {
             type === 'pdf' && url !== '' &&  (
               <PDFViewer fileUrl={url} fileType="pdf" isDocument={true}/> 

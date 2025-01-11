@@ -76,13 +76,14 @@ export async function getConversationByDocument(documentId: string) {
   return response;
 }
 
-export async function deleteDocument(documentId: string) {
+export async function deleteDocument(documentId: string, projectId: string) {
   const accessToken = localStorage.getItem("access_token");
 
   const response = await axios.post(
     `${API_URL}/api/documents/delete`,
     {
       document_id: documentId,
+      project_id: projectId
     },
     {
       headers: {

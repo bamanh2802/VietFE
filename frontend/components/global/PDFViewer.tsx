@@ -15,6 +15,9 @@ interface FileViewerProps {
 const FileViewer: React.FC<FileViewerProps> = ({ fileUrl, fileType, isDocument }) => {
   if (fileType !== 'pdf') return null;
 
+  useEffect(()=> {
+    console.log(fileUrl, fileType)
+  }, [fileUrl, fileType])
 
   // Plugin mặc định với các tính năng đầy đủ
   const defaultLayoutPluginInstance = defaultLayoutPlugin({
@@ -32,44 +35,29 @@ const FileViewer: React.FC<FileViewerProps> = ({ fileUrl, fileType, isDocument }
   });
 
   return (
-    <div
-      style={{
-        height: `${isDocument ? 'calc(100% - 160px)' : 'calc(100% - 300px)'}`, // Điều chỉnh chiều cao để phù hợp với phần còn lại của trang
+    <div 
+      style={{ 
+        height: `${isDocument ? 'calc(100vh - 160px)' : 'calc(100vh - 336px)'}`,
         width: '100%',
-        backgroundColor: '#f5f5f5',
+        backgroundColor: '#f5f5f5'
       }}
     >
-      <div
-        style={{
-          width: '100%',
-          height: '100%',
-          overflow: 'auto', // Thêm thanh cuộn nếu nội dung quá dài
-        }}
-      >
-        <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.worker.min.js">
-          <Viewer
-            fileUrl={fileUrl}
-            plugins={[defaultLayoutPluginInstance]}
-            defaultScale={SpecialZoomLevel.PageFit}
-            theme={{
-              theme: 'auto',
-            }}
-            renderLoader={(percentages: number) => (
-              <div
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <div>Loading document: {Math.round(percentages)}%</div>
-              </div>
-            )}
-          />
-        </Worker>
-      </div>
+      <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.worker.min.js">
+        <Viewer
+          fileUrl={fileUrl}
+          plugins={[defaultLayoutPluginInstance]}
+          defaultScale={SpecialZoomLevel.PageFit}
+          theme={{
+            theme: 'auto'
+          }}
+          renderLoader={(percentages: number) => (
+            <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div>Loading document: {Math.round(percentages)}%</div>
+            </div>
+          )}
+          
+        />
+      </Worker>
     </div>
   );
 };
