@@ -23,7 +23,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import ResultDisplay from "./ResultDisplay";
 import ShareWorkspace from "./ShareWorkspace";
-
 interface RichTextEditorProps {
   selectedNote: string;
   note: Note;
@@ -65,8 +64,6 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   const openShare = () => setIsOpenShare(true)
 
   useEffect(() => {
-    console.log(note)
-    console.log(isLoading)
     if (note) {
       setTitle(note.title);
       setEditorContent(note.content);

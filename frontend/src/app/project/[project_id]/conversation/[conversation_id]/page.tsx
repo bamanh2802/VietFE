@@ -10,7 +10,7 @@ import PreLoader from "@/public/img/PreLoader.gif";
 import Head from 'next/head';
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Button } from "@/components/ui/button";
+import { Button } from "@nextui-org/react";
 import {
   Select,
   SelectContent,
@@ -28,6 +28,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 
+import { useTranslations } from 'next-intl';
 import { Conversation, Project } from "@/src/types/types";
 import { getConversationInProject, getProjectById } from "@/service/projectApi";
 import UserDropdown from "@/components/global/UserDropdown";
@@ -52,6 +53,8 @@ const WorkSpace: React.FC<WorkSpaceProps> = ({params}) => {
   const router = useRouter();
   const { project_id, conversation_id } = params
   const [projectInfo, setProjectInfo] = useState<Project>();
+  const p = useTranslations('Project');
+  const g = useTranslations('Global');
   const handleToggleAPI = () => {
     setIsOpenAPI(!isOpenAPI)
   }
@@ -126,54 +129,35 @@ const WorkSpace: React.FC<WorkSpaceProps> = ({params}) => {
       />
       <div className="flex-1 flex flex-col relative">
         <div className="z-[20] absolute top-0 w-full h-11 bg-zinc-100 dark:bg-zinc-800" />
-        <div className="absolute top-2 left-6 z-30">
-          <Breadcrumbs>
-            <BreadcrumbItem onClick={handleBackHome}>
-              <HomeIcon className="w-4 h-4" />
-            </BreadcrumbItem>
-            <BreadcrumbItem
-              onClick={() => handleRouterToProject(projectInfo as Project)}
-            >
-              {projectInfo?.name}
-            </BreadcrumbItem>
-            <BreadcrumbItem>{conversationName}</BreadcrumbItem>
-          </Breadcrumbs>
-        </div>
-        <div className="absolute z-30 top-2 right-6 flex items-center">
-          <div className="z-10 mr-6">
-          <Select defaultValue="gemini">
-            <SelectTrigger className="w-[180px] shadow-none border-none">
-              <SelectValue placeholder="Theme" />
-            </SelectTrigger>
-            <SelectContent className="bg-zinc-200 dark:bg-zinc-900 shadow-none border-none">
-              <SelectItem value="gemini">Google Gemini</SelectItem>
-              <SelectItem value="chatgpt">Chat GPT</SelectItem>
-              <SelectItem value="claude">Claude AI</SelectItem>
-                <Button 
-                onClick={handleToggleAPI}
-                size="sm"
-                variant="outline"
-                className="border-none shadow-none flex items-center w-full bg-zinc-200 dark:bg-zinc-900">
-                <PlusIcon className="w-4 h-4 mr-2"/>
-                  Add Api Key
-                </Button>
-            </SelectContent>
-          </Select>
-          </div>
-          <Button 
-          size="sm"
-          variant="ghost"
-          className="z-10 mr-4 border-none shadow-none bg-zinc-100 dark:bg-zinc-800">
-            <UsersIcon className="w-4 h-4 mr-2"/> Share
-          </Button>
-          <UserDropdown />
-        </div>
+            <div className="absolute top-4 left-5 z-40">
+              <Breadcrumbs>
+                <BreadcrumbItem onClick={handleBackHome}>
+                  <HomeIcon className="w-4 h-4" />
+                </BreadcrumbItem>
+                <BreadcrumbItem
+                  onClick={() => handleRouterToProject(projectInfo as Project)}
+                >
+                  {projectInfo?.name}
+                </BreadcrumbItem>
+                <BreadcrumbItem>{conversationName}</BreadcrumbItem>
+              </Breadcrumbs>
+            </div>
+            <div className="absolute flex items-center top-4 right-5 z-40">
+              <Button 
+              size="sm"
+              variant="ghost"
+              className="z-10 mr-4 border-none shadow-none bg-zinc-100 dark:bg-zinc-800">
+                <UsersIcon className="w-4 h-4 mr-2"/> Share
+              </Button>
+              <UserDropdown />
+            </div>
         <ChatWindow
           conversation_id={conversation_id as string}
           isDocument={false}
           project_id={project_id as string}
           content=''
           option=''
+          documentId=""
         />
       </div>
       <Dialog open={isOpenAPI} onOpenChange={handleToggleAPI}>

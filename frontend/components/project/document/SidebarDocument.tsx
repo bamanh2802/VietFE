@@ -23,6 +23,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { useTranslations } from 'next-intl';
 
 interface SidebarDocumentProps {
   documentName: string;
@@ -59,6 +60,8 @@ const SidebarDocument: React.FC<SidebarDocumentProps> = ({
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
 
+  const g = useTranslations('Global');
+  const d = useTranslations('Document');
   const handleOpenDeleteConversation = () => {
     setContextMenu({ ...contextMenu, id: null });
     setIsDeleteConversation(!isDeleteConversation);
@@ -216,7 +219,7 @@ const SidebarDocument: React.FC<SidebarDocumentProps> = ({
       </div>
     ) : (
       <div className="ml-4 mt-1 text-gray-500 italic text-sm">
-        Không có cuộc trò chuyện nào.
+        {d('NoConversation')}
       </div>
     );
 
@@ -234,7 +237,7 @@ const SidebarDocument: React.FC<SidebarDocumentProps> = ({
 
      
 
-      <h2 className="text-sm font-semibold text-gray-500">Conversations</h2>
+      <h2 className="text-sm font-semibold text-gray-500">{g('Conversations')}</h2>
 
       {renderConversations()}
 
@@ -244,7 +247,7 @@ const SidebarDocument: React.FC<SidebarDocumentProps> = ({
         startContent={!isLoadingCreate ? <PlusIcon className="w-4 h-4" /> : ""}
         onClick={createNewConversation}
       >
-        <span>New Conversation</span>
+        <span>{g('NewConversation')}</span>
       </Button>
 
       {/* Hiển thị context menu nếu có cuộc trò chuyện được nhấp chuột phải */}
@@ -265,7 +268,7 @@ const SidebarDocument: React.FC<SidebarDocumentProps> = ({
                   }}
                 >
                   <PencilSquareIcon className="h-4 w-4 mr-2" />
-                  Rename
+                  {g('Rename')}
                 </div>
               </ListboxItem>
               <ListboxItem
@@ -277,7 +280,7 @@ const SidebarDocument: React.FC<SidebarDocumentProps> = ({
               >
                 <div className="flex items-center">
                   <TrashIcon className="h-4 w-4 mr-2" />
-                  Delete
+                  {g('Delete')}
                 </div>
               </ListboxItem>
             </Listbox>
@@ -293,23 +296,24 @@ const SidebarDocument: React.FC<SidebarDocumentProps> = ({
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center">
               <ExclamationCircleIcon className="w-6 h-6 mr-2" />
-              Do you really want to delete
+              {d('DeleteTitle')}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone.{" "}
-              <span className="font-bold">{newName}</span> cannot be restored.
+              {d('DeleteDescription1')}
+            {" "}
+              <span className="font-bold">{newName}</span> {d('DeleteDescription2')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <Button onClick={() => handleOpenDeleteConversation()}>
-              Cancel
+            {g('Cancel')}
             </Button>
             <Button
               color="danger"
               isLoading={isLoading}
               onClick={() => handleDelete()}
             >
-              Delete
+            {g('Delete')}
             </Button>
           </AlertDialogFooter>
         </AlertDialogContent>

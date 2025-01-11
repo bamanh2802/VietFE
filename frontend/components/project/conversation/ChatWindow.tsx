@@ -7,7 +7,6 @@ import React, {
   useState,
   useRef,
   FormEvent,
-  KeyboardEvent,
   MouseEvent,
 } from "react";
 import {
@@ -38,12 +37,9 @@ import {
 } from "@heroicons/react/24/outline";
 import { TranslationPopup } from "@/components/global/Translate";
 import { Card, CardBody, CardHeader } from "@nextui-org/react";
-
-
 import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { v4 as uuidv4 } from "uuid";
-import { RiRobot2Line } from "react-icons/ri";
 import dynamic from "next/dynamic";
 
 import { ListboxWrapper } from "@/components/ListboxWrapper";
@@ -62,7 +58,7 @@ import {
 } from "@/components/ui/hover-card";
 import { useToast } from "@/hooks/use-toast";
 import { getDocumentsByConversation } from "@/service/documentApi";
-import { Chunk, Document, Message, MessageHistory } from "@/src/types/types";
+import { Document, Message} from "@/src/types/types";
 import { createNewNote } from "@/service/noteApi";
 import DocumentViewer from "@/components/global/DocumentViewer";
 import BotLoading from "@/public/svg/activity.json";
@@ -70,7 +66,16 @@ import TypingMessage from "@/components/chatbot/TypingMessage";
 import MarkdownRenderer from "@/components/chatbot/CodeBlock";
 import { getChatHistory } from "@/service/apis";
 import API_URL from "@/service/ApiUrl";
-import { m } from "framer-motion";
+import { QuickiesDefine, 
+  QuickiesCompare, 
+  QuickiesGatherInfo, 
+  QuickiesSearchWeb, 
+  QuickiesSearchWiki } from "@/service/chatbot";
+import {
+  summarizeDocument,
+  shallowOutlineDocument,
+} from "@/service/documentApi";
+
 
 interface ChatWindowProps {
   isDocument: boolean;
@@ -78,18 +83,68 @@ interface ChatWindowProps {
   project_id: string;
   content: string;
   option: string;
+  documentId: string
 }
 interface DropdownPosition {
   x: number;
   y: number;
 }
+interface Command {
+  description: string;
+  hint: string;
+  type: string
+}
+
+interface Commands {
+  [key: string]: Command;
+}
+
+const COMMANDS: Commands = {
+  '/search-web': {
+    description: 'Tìm kiếm thông tin trên web',
+    hint: 'Nhập từ khóa để tìm kiếm',
+    type: "general"
+  },
+  '/compare': {
+    description: 'So sánh từ khóa',
+    hint: 'Nhập các từ khóa. Hãy nhập theo định dạng (item1, item2, ...)',
+    type: "general"
+  },
+  '/define': {
+    description: 'Định nghĩa',
+    hint: 'Nhập từ khóa để định nghĩa',
+    type: "general"
+  },
+  '/search-wiki': {
+    description: 'Tìm kiếm thông tin trên Wikipedia',
+    hint: 'Nhập từ khóa để tìm kiếm',
+    type: "general"
+  },
+  '/gather-info': {
+    description: 'Thu thập thông tin',
+    hint: 'Nhập từ khóa để thu thập thông tin từ nhiều nguồn',
+    type: "general"
+  },
+  '/summarize': {
+    description: 'Tóm tắt tài liệu',
+    hint: 'Không cần nhập thêm thông tin',
+    type: "document"
+  },
+  '/create-outline': {
+    description: 'Tạo outline cho tài liệu',
+    hint: 'Không cần nhập thêm thông tin',
+    type: "document"
+  },
+};
+
 
 const ChatWindow: FC<ChatWindowProps> = ({
   project_id,
   isDocument,
   conversation_id,
   content,
-  option
+  option,
+  documentId
 }) => {
   const router = useRouter();
   const { toast } = useToast();
@@ -119,7 +174,7 @@ const ChatWindow: FC<ChatWindowProps> = ({
   );
   const [showPopup, setShowPopup] = useState(false)
   const messageRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
-  const [isMessage, setIsMessage] = useState<boolean>(true)
+  const [isMessage, setIsMessage] = useState<boolean>(false)
 
   const toggleMessage = () => setIsMessage(!isMessage)
 
@@ -173,7 +228,7 @@ const ChatWindow: FC<ChatWindowProps> = ({
   const handleGetDocumentByConversation = async () => {
     try {
       const data = await getDocumentsByConversation(conversation_id);
-
+      console.log(data)
       setDocuments(data.data);
     } catch (e) {
       console.log(e);
@@ -235,7 +290,6 @@ const ChatWindow: FC<ChatWindowProps> = ({
     console.log(conversation_id)
     try {
       const data = await getChatHistory(conversation_id as string)
-      console.log(data)
       dispatch(addChatHistory({ conversation_id, messages: data.data }));
     } catch (e) {
       console.log(e)
@@ -309,7 +363,6 @@ const ChatWindow: FC<ChatWindowProps> = ({
 
       socket.current.onmessage = (event: MessageEvent) => {
         const response = event.data;
-        console.log(response)
         if (
           response !== "<END_OF_CONTEXT>" &&
           !response.includes("chunk_id") &&
@@ -388,7 +441,6 @@ const ChatWindow: FC<ChatWindowProps> = ({
         const contentChatNoNewLine = contentChat.replace(/\n/g, '');
         const current_message = `> ${contentChatNoNewLine}\n${userMessage}`;
         const payload = JSON.stringify({ current_message, chat_history });
-        console.log(payload)
         socket.current.send(payload);
         dispatch(addUserMessage({ conversation_id, content: current_message }));
         setInput("");
@@ -397,7 +449,6 @@ const ChatWindow: FC<ChatWindowProps> = ({
       } else {
         const current_message = userMessage
         const payload = JSON.stringify({ current_message, chat_history });
-        console.log(payload)
         socket.current.send(payload);
         dispatch(addUserMessage({ conversation_id, content: userMessage }));
         setInput("");
@@ -444,15 +495,58 @@ const ChatWindow: FC<ChatWindowProps> = ({
   
 
   const handleExplainWord = async (input: string) => {
-    const message = `Explain "${input}"`;
+    const message = `Giải thích "${input}"`;
 
     sendMessage(message);
 
     setContextMenu(null);
   };
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement> | React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
+  const handleKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    if (showSuggestions) {
+      const commands = Object.keys(COMMANDS);
+  
+      const filteredCommands = commands.filter(command =>
+        command.startsWith(input)  // Lọc các lệnh bắt đầu bằng input
+      );
+  
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setSelectedIndex((prev) => Math.min(prev + 1, filteredCommands.length - 1));
+      } 
+      else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setSelectedIndex((prev) => Math.max(prev - 1, 0));
+      } 
+      else if (e.key === 'Enter') {
+        e.preventDefault();
+        if (selectedIndex !== -1) {
+          const selectedCommand = filteredCommands[selectedIndex];
+          setInput(`${selectedCommand} `);
+          setActiveCommand(selectedCommand);
+          setShowSuggestions(false);
+          setShowHint(true);
+          textareaRef.current?.focus();
+        } else {
+          handleMessageSubmit(e);
+        }
+      }
+    } else {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        handleMessageSubmit(e);
+      }
+    }
+  };
+  
+
+  const handleMessageSubmit = (
+    e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    if (input.startsWith('/')) {
+      handleGetQuickies()
+    } else {
       sendMessage(input as string, e as unknown as FormEvent<HTMLFormElement>);
     }
   };
@@ -537,8 +631,178 @@ const ChatWindow: FC<ChatWindowProps> = ({
     // Regular message
     return <p className="text-sm">{content}</p>;
   };
+
+  const [showSuggestions, setShowSuggestions] = useState<boolean>(false);
+  const [showHint, setShowHint] = useState<boolean>(false);
+  const [activeCommand, setActiveCommand] = useState<string>('');
+  const [selectedIndex, setSelectedIndex] = useState<number>(0);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const handleGetQuickies = () => {
+    const documentIds = documents.map(doc => doc.document_id);
+    const regex = /^\/([^\s]+)\s*(.*)/; 
+    
+    const match = input.match(regex);
+    const command = match ? match[1] : "";
+    const result = match ? match[2] : "";
+    setInput("");
+  
+    if (command === 'gather-info') {
+      dispatch(addUserMessage({ conversation_id, content: `Thu thập thông tin ` + result }));
+      dispatch(addServerMessage({ conversation_id, content: "" }));
+      handleQuickiesGatherInfo(documentIds, result);
+    } else if (command === 'compare') {
+      handleQuickiesCompare(documentIds, result);
+    } else if (command === 'search-web') {
+      dispatch(addUserMessage({ conversation_id, content: `Tìm kiếm ` + result }));
+      dispatch(addServerMessage({ conversation_id, content: "" }));
+      handleQuickiesSearchWeb(result);
+    } else if (command === 'define') {
+      dispatch(addUserMessage({ conversation_id, content: `Định nghĩa ` + result }));
+      dispatch(addServerMessage({ conversation_id, content: "" }));
+      handleQuickiesDefine(documentIds, result);
+    } else if (command === 'search-wiki') {
+      dispatch(addUserMessage({ conversation_id, content: `Tìm kiếm trên wikipedia ` + result }));
+      dispatch(addServerMessage({ conversation_id, content: "" }));
+      handleQuickiesSearchWiki(result);
+    } else if (command === 'summarize') {
+      dispatch(addUserMessage({ conversation_id, content: `Tóm tắt tài liệu` }));
+      dispatch(addServerMessage({ conversation_id, content: "" }));
+      handleSummarize()
+    } else if (command === 'create-outline') {
+      dispatch(addUserMessage({ conversation_id, content: `Tạo cấu trúc tài liệu` }));
+      dispatch(addServerMessage({ conversation_id, content: "" }));
+      handleCreateOutline()
+    }
+    else {
+      dispatch(addServerMessage({ conversation_id, content: "Command not recognized." }));
+    }
+  };
+  
+  const handleQuickiesGatherInfo = async (documentIds: string[], keyword: string) => {
+    try {
+      const data = await QuickiesGatherInfo(documentIds, keyword);
+      dispatch(updateServerMessage({ conversation_id, content: data.data }))
+    } catch (e) {
+      dispatch(updateServerMessage({ conversation_id, content: "Something went wrong!" }));
+    } finally {
+      dispatch(finalizeServerMessage({ conversation_id, chunk_ids: [] }));
+    }
+  };
+  
+  const handleQuickiesCompare = async (documentIds: string[], keyword: string) => {
+    const arr = keyword.split(",").map(item => item.trim());
+    const markdownList = arr.map(item => `- ${item}`).join("\n");
+    dispatch(addUserMessage({ conversation_id, content: `So sánh ${markdownList} ` }));
+    dispatch(addServerMessage({ conversation_id, content: "" }));
+    try {
+      const data = await QuickiesCompare(documentIds, arr);
+      dispatch(updateServerMessage({ conversation_id, content: data.data }))
+    } catch (e) {
+      dispatch(updateServerMessage({ conversation_id, content: "Something went wrong!" }));
+    } finally {
+      dispatch(finalizeServerMessage({ conversation_id, chunk_ids: [] }));
+    }
+  };
+  
+  const handleQuickiesSearchWeb = async (keyword: string) => {
+    try {
+      const data = await QuickiesSearchWeb(keyword);
+      const content = typeof data.data === 'string' ? data.data : JSON.stringify(data.data);
+      dispatch(updateServerMessage({ conversation_id, content: content }));
+    } catch (e) {
+      dispatch(updateServerMessage({ conversation_id, content: "Something went wrong!" }));
+
+    } finally {
+      dispatch(finalizeServerMessage({ conversation_id, chunk_ids: [] }));
+    }
+  };
+  
+  
+  const handleQuickiesDefine = async (documentIds: string[], keyword: string) => {
+    try {
+      const data = await QuickiesDefine(documentIds, keyword);
+      dispatch(updateServerMessage({ conversation_id, content: data.data }));
+    } catch (e) {
+      dispatch(updateServerMessage({ conversation_id, content: "Something went wrong!" }));
+    } finally {
+      dispatch(finalizeServerMessage({ conversation_id, chunk_ids: [] }));
+    }
+  };
+  
+  const handleQuickiesSearchWiki = async (keyword: string) => {
+    try {
+      const data = await QuickiesSearchWiki(keyword);
+      dispatch(updateServerMessage({ conversation_id, content: data.data.content }));
+    } catch (e) {
+      dispatch(updateServerMessage({ conversation_id, content: "Something went wrong!" }));
+    } finally {
+      dispatch(finalizeServerMessage({ conversation_id, chunk_ids: [] }));
+    }
+  };
+
+  const handleSummarize = async () => {
+    try {
+      const data = await summarizeDocument(documentId as string);
+      dispatch(updateServerMessage({ conversation_id, content: data.data }));
+    } catch (e) {
+      console.log(e);
+    } finally {
+      dispatch(finalizeServerMessage({ conversation_id, chunk_ids: [] }));
+    }
+  };
+
   
 
+  const handleCreateOutline = async (): Promise<void> => {
+    try {
+      const data = await shallowOutlineDocument(documentId as string);
+      dispatch(updateServerMessage({ conversation_id, content: data.data }));
+      console.log(data.data)
+    } catch (e) {
+      console.error("Error fetching outline data:", e);
+    } finally {
+      dispatch(finalizeServerMessage({ conversation_id, chunk_ids: [] }));
+    }
+  };
+  
+
+  useEffect(() => {
+    if (input === '/') {
+      setShowSuggestions(true);
+      setShowHint(false);
+      setSelectedIndex(0);
+    } else if (input.startsWith('/')) {
+      const matchingCommands = Object.keys(COMMANDS).filter(cmd => 
+        cmd.toLowerCase().startsWith(input.toLowerCase())
+      );
+      
+      if (matchingCommands.length > 0) {
+        setShowSuggestions(true);
+        setShowHint(false);
+      } else {
+        const command = Object.keys(COMMANDS).find(cmd => 
+          input.toLowerCase().startsWith(cmd.toLowerCase() + ' ')
+        );
+        if (command) {
+          setShowSuggestions(false);
+          setShowHint(true);
+          setActiveCommand(command);
+        } else {
+          setShowSuggestions(false);
+          setShowHint(false);
+        }
+      }
+    } else {
+      setShowSuggestions(false);
+      setShowHint(false);
+    }
+  }, [input]);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log('Submitted:', input);
+  };
 
   return (
     <div className="flex">
@@ -769,7 +1033,6 @@ const ChatWindow: FC<ChatWindowProps> = ({
             )}
           </div>
 
-          {/* Message input form */}
           <div className="pl-6 w-full bg-zinc-100 dark:bg-zinc-800 flex justify-center items-center flex-col mt-4 sticky bottom-0">
                 {optionChat === 'quote' && contentChat && (
                   <div className="w-full max-w-2xl mb-2 px-4 py-2 bg-slate-100 border border-slate-300 rounded-xl shadow-md flex items-center gap-2">
@@ -785,27 +1048,100 @@ const ChatWindow: FC<ChatWindowProps> = ({
                   </div>
                 )}
 
+      <div className="relative max-w-2xl w-full">
+      <div className="absolute bottom-full mb-1 w-full">
+                <div
+                  className={`
+                    transform transition-all duration-200 ease-in-out
+                    absolute w-full
+                    bottom-0
+                    ${showSuggestions 
+                      ? 'opacity-100 translate-y-0' 
+                      : 'opacity-0 translate-y-2 pointer-events-none'}
+                  `}
+                >
+                 <Card className="w-fit">
+                  <CardBody className="p-0">
+                    {Object.entries(COMMANDS)
+                      .filter(([cmd, { type }]) =>
+                        cmd.toLowerCase().startsWith(input.toLowerCase()) && (type !== 'document' || isDocument)
+                      )
+                      .map(([cmd, { description }], index) => (
+                        <div
+                          key={cmd}
+                          className={`
+                            group p-3 py-1 cursor-pointer
+                            transition-colors duration-150 ease-in-out
+                            hover:bg-default-100
+                            ${index === selectedIndex ? 'bg-default-100' : 'bg-transparent'}
+                            border-b border-divider last:border-b-0
+                          `}
+                          onClick={() => {
+                            setInput(`${cmd} `);
+                            setActiveCommand(cmd);
+                            setShowSuggestions(false);
+                            setShowHint(true);
+                            textareaRef.current?.focus();
+                          }}
+                        >
+                          <p className="font-medium text-default-900">{cmd}</p>
+                          <p className="text-sm text-default-500">{description}</p>
+                        </div>
+                      ))}
+                  </CardBody>
+                </Card>
+
+              </div>
+
+              <div
+                className={`
+                  transform transition-all w-fit duration-200 ease-in-out mt-1
+                  ${showHint ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2 pointer-events-none'}
+                `}
+              >
+                {activeCommand && (
+                  <Card>
+                    <CardBody className="w-fit py-2 px-3">
+                      <p className="text-sm text-default-600">
+                        {COMMANDS[activeCommand].hint}
+                      </p>
+                    </CardBody>
+                  </Card>
+                )}
+              </div>
+            </div>
+
+            {/* Form */}
             <form
-              className="max-w-2xl pr-2 flex w-full justify-center items-center rounded-3xl"
-              onSubmit={(e) => sendMessage(input, e)}
+              className="flex w-full items-center space-x-2"
+              onSubmit={handleSubmit}
             >
               <Textarea
-                className="flex-1 p-1 rounded-full"
-                minRows={1}
-                placeholder="Type your message..."
+                ref={textareaRef}
                 value={input}
-                variant="faded"
                 onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => handleKeyDown(e)}
+                onKeyDown={handleKeyDown}
+                placeholder="Type / for commands..."
+                minRows={1}
+                maxRows={3}
+                variant="faded"
+                classNames={{
+                  input: "resize-none",
+                  inputWrapper: "rounded-full"
+                }}
               />
+              
               <Button
                 isIconOnly
-                className="ml-2 text-white p-2 rounded-full bg-slate-400"
                 type="submit"
+                color="default"
+                className="rounded-full"
+                size="lg"
               >
-                <ArrowRightIcon />
+                <ArrowRightIcon className="w-4 h-4" />
               </Button>
             </form>
+          </div>
             <div className="text-xs opacity-75 my-2">
               Viet can make mistakes. Check important info.
             </div>

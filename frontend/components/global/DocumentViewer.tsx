@@ -6,15 +6,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-const Viewer = dynamic(() => import('@react-pdf-viewer/core').then(mod => mod.Viewer), { ssr: false });
-const Worker = dynamic(() => import('@react-pdf-viewer/core').then(mod => mod.Worker), { ssr: false });
-import "@react-pdf-viewer/core/lib/styles/index.css";
-import { defaultLayoutPlugin } from "@react-pdf-viewer/default-layout";
-import "@react-pdf-viewer/default-layout/lib/styles/index.css";
 import { Document, Chunk } from "@/src/types/types";
 import { getChunkDocument } from "@/service/documentApi";
+import PDFViewer from "@/components/global/PDFViewer";
+import { getDocumentUrl } from "@/service/documentApi";
+import { DocumentSkeleton } from "../project/document/DocumentSkeleton";
 
-import dynamic from 'next/dynamic';interface DocumentProps {
+interface DocumentProps {
   document: Document;
   isOpen: boolean;
   onClose: () => void;
@@ -26,30 +24,40 @@ const DocumentViewer: React.FC<DocumentProps> = ({
   onClose,
 }) => {
   const [selectedTab, setSelectedTab] = useState<string>("raw");
-  const defaultLayoutPluginInstance = defaultLayoutPlugin();
+  const [url, setUrl] = useState<string>('')
   const [chunks, setChunks] = useState<Chunk[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
+  const handleGetUrlDocument = async () => {
+    try {
+      const data = await getDocumentUrl(document?.document_id)
+      setUrl(data.data)
+    } catch (e){
+      console.log(e)
+    }
+  }
+
   const handleGetChunkDocument = async () => {
-    if (!document?.document_id) return; // Kiểm tra document_id
-    setLoading(true); // Bắt đầu tải dữ liệu
-    setError(null); // Reset lỗi
+    if (!document?.document_id) return; 
+    setLoading(true); 
+    setError(null); 
 
     try {
       const data = await getChunkDocument(document.document_id);
       setChunks(data.data);
     } catch (e) {
       console.error(e);
-      setError("Failed to load document chunks."); // Thông báo lỗi
+      setError("Failed to load document chunks."); 
     } finally {
-      setLoading(false); // Kết thúc tải dữ liệu
+      setLoading(false); 
     }
   };
 
   useEffect(() => {
     handleGetChunkDocument();
-  }, [document?.document_id]); // Gọi hàm khi document_id thay đổi
+    handleGetUrlDocument()
+  }, [document?.document_id]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -70,11 +78,24 @@ const DocumentViewer: React.FC<DocumentProps> = ({
         >
           <Tab key="raw" title="Raw">
             <div className="p-4 h-full">
-              <h3 className="text-lg font-semibold">Raw PDF Content</h3>
-              <div className="border border-gray-300 h-full">
-                <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.worker.min.js">
-                  <Viewer fileUrl={document?.document_path} />
-                </Worker>
+              <div className="border-none h-full">
+              {
+                  document?.type === 'pdf' && url !== '' &&  (
+                    <PDFViewer fileUrl={url} fileType="pdf" isDocument={false}/> 
+
+                  )
+                }
+                {
+                  document?.type === 'doc' || document?.type === 'docx' && url !== '' && (
+                    <PDFViewer fileUrl={url} fileType="docx" isDocument={false}/> 
+
+                  )
+                }
+                {
+                  (!!document || url === '') && (
+                    <DocumentSkeleton />
+                  )
+                }
               </div>
             </div>
           </Tab>

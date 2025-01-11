@@ -82,7 +82,7 @@ export async function renameNote(noteId: string, newName: string) {
 
 export async function editNote(noteId: string, content: string, formatted_text: string) {
   const accessToken = localStorage.getItem("access_token");
-
+  console.log(formatted_text)
   const response = await axios.put(
     `${API_URL}/api/notes/edit`,
     new URLSearchParams({

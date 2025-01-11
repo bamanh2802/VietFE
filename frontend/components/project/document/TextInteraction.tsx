@@ -12,8 +12,6 @@ import {
 import { Tabs, Tab } from "@nextui-org/react";
 import { useRouter } from "next/navigation";
 import { Textarea } from "@nextui-org/react";
-import API_URL from "@/service/ApiUrl";
-import DocViewer, { DocViewerRenderers } from "@cyntler/react-doc-viewer";
 import "@cyntler/react-doc-viewer/dist/index.css";
 import 'pdfjs-dist/build/pdf.worker.entry';
 import { getChunkDocument, keywordSearchChunks, getDocumentById } from "@/service/documentApi";
@@ -24,6 +22,7 @@ import WebsiteViewer from "@/components/global/WebsiteViewer";
 import { TranslationPopup } from "@/components/global/Translate";
 import { getDocumentUrl } from "@/service/documentApi";
 import { DocumentSkeleton } from "./DocumentSkeleton";
+import { useTranslations } from 'next-intl';
 interface DropdownPosition {
   x: number;
   y: number;
@@ -47,6 +46,8 @@ const TextInteraction: React.FC<TextInteractionProps> = ({handleActionDocument, 
   const router = useRouter();
   const { project_id, document_id } = params
 
+  const d = useTranslations('Document');
+  const g = useTranslations('Global');
   const [chunks, setChunks] = useState<Chunk[]>([]);
   const [originalChunks, setOriginalChunks] = useState<Chunk[]>([]); // Store the initial full chunk data
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -186,18 +187,18 @@ const TextInteraction: React.FC<TextInteractionProps> = ({handleActionDocument, 
   return (
     <div className="h-full flex-1 bg-zinc-100 border-l-1 dark:bg-zinc-800">
       <Tabs aria-label="Raw" variant="underlined">
-        <Tab key="raw" title="Raw">
+        <Tab key="raw" title={d('Raw')}>
           <div ref={textRef} className="p-4 rounded relative leading-relaxed">
           <div className="border h-[100%-100px]">
           {
             type === 'pdf' && url !== '' &&  (
-              <PDFViewer fileUrl={url} fileType="pdf" /> 
+              <PDFViewer fileUrl={url} fileType="pdf" isDocument={true}/> 
 
             )
           }
           {
             type === 'doc' || type === 'docx' && url !== '' && (
-              <PDFViewer fileUrl={url} fileType="docx" /> 
+              <PDFViewer fileUrl={url} fileType="docx" isDocument={true}/> 
 
             )
           }
@@ -219,7 +220,7 @@ const TextInteraction: React.FC<TextInteractionProps> = ({handleActionDocument, 
           </div>
         </Tab>
 
-        <Tab key="chunks" title="Chunks">
+        <Tab key="chunks" title={d('Chunks')}>
           <div className="p-4 h-[calc(100vh-128px)] overflow-hidden relative">
             <Textarea
               className="max-w-none border-1 rounded-xl absolute top-0 left-0 w-full z-10"
@@ -269,27 +270,27 @@ const TextInteraction: React.FC<TextInteractionProps> = ({handleActionDocument, 
               >
                 <ListboxItem textValue="copy" key="copy">
                   <div className="flex items-center">
-                    <Square2StackIcon className="pr-1 w-5 h-5" /> Copy
+                    <Square2StackIcon className="pr-1 w-5 h-5" /> {g('Copy')}
                   </div>
                 </ListboxItem>
                 <ListboxItem textValue="copy" key="explain">
                   <div className="flex items-center">
-                    <QuestionMarkCircleIcon className="pr-1 w-5 h-5" /> Explain
+                    <QuestionMarkCircleIcon className="pr-1 w-5 h-5" /> {g('Explain')}
                   </div>
                 </ListboxItem>
                 <ListboxItem textValue="copy" key="addNote">
                   <div className="flex items-center">
-                    <ClipboardDocumentCheckIcon className="pr-1 w-5 h-5" /> Add to Note
+                    <ClipboardDocumentCheckIcon className="pr-1 w-5 h-5" />{g('AddToNote')} 
                   </div>
                 </ListboxItem>
                 <ListboxItem textValue="copy" key="quote">
                   <div className="flex items-center">
-                    <PaperClipIcon className="pr-1 w-5 h-5" /> Quote
+                    <PaperClipIcon className="pr-1 w-5 h-5" /> {g('Quote')}
                   </div>
                 </ListboxItem>
                 <ListboxItem textValue="copy" key="translate">
                   <div className="flex items-center">
-                    <LanguageIcon className="pr-1 w-5 h-5" /> Translate
+                    <LanguageIcon className="pr-1 w-5 h-5" /> {g('Translate')} 
                   </div>
                 </ListboxItem>
               </Listbox>

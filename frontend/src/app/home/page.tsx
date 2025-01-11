@@ -50,6 +50,7 @@ const Home = () => {
     try {
       const data = await getAllConversationByUser();
       dispatch(setConversations(data.data))
+      console.log(data)
     } catch (e) {
       console.log(e);
     }

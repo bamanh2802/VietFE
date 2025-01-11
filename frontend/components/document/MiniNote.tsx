@@ -16,7 +16,7 @@ import { createNewNote, deleteNote, renameNote, editNote, getNoteById } from "@/
 import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 import { useToast } from "@/hooks/use-toast";
 import NoteList from "./NoteList";
-
+import { Skeleton } from '@nextui-org/react';
 interface MiniNoteProps {
   projectId: string
 }
@@ -25,6 +25,7 @@ const MiniNote: React.FC<MiniNoteProps> = ({ projectId }) => {
   const { toast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
   const [notes, setNotes] = useState<Note[]>();
+  const [isLoading, setIsLoading] = useState<boolean>(false)
   const [selectedNote, setSelectedNote] = useState<Note | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [debounceTimeout, setDebounceTimeout] = useState<NodeJS.Timeout | null>(
@@ -108,7 +109,7 @@ const MiniNote: React.FC<MiniNoteProps> = ({ projectId }) => {
     }
   };
   const handleGetNoteById = async (noteId: string) => {
-    console.log(noteId)
+    setIsLoading(true)
     try {
       const data = await getNoteById(noteId);
       setIsEditing(true)
@@ -116,6 +117,8 @@ const MiniNote: React.FC<MiniNoteProps> = ({ projectId }) => {
     } catch (e) {
       console.log(e);
     }
+    setIsLoading(false)
+
   };
 
 
@@ -124,10 +127,9 @@ const MiniNote: React.FC<MiniNoteProps> = ({ projectId }) => {
       handleGetNotes();
     }
   }, [projectId]);
-  const handleEditNote = async (noteId: string, content: string) => {
+  const handleEditNote = async (noteId: string, content: string, formatted_text: string) => {
     try {
-      const data = await editNote(noteId, content, content);
-      console.log(data);
+      const data = await editNote(noteId, content, formatted_text);
     } catch (e) {
       console.log(e);
     }
@@ -140,10 +142,21 @@ const MiniNote: React.FC<MiniNoteProps> = ({ projectId }) => {
 
     // Đặt lại timeout mới sau 1s
     const timeout = setTimeout(() => {
-      const contentJson = JSON.stringify(content.document);
-
-      if (selectedNote !== null) {
-        handleEditNote(selectedNote.note_id, contentJson);
+      const formatted_text = JSON.stringify(content.document);
+      const contentObject = content.document; 
+      const context = contentObject
+        .map((block: any) => 
+          block.content
+            .map((item: any) => item.text) 
+            .join("") 
+        )
+        .join(" "); 
+        
+        
+        if (selectedNote !== null) {
+        console.log(selectedNote.note_id, context, formatted_text)
+        handleEditNote(selectedNote.note_id, context, formatted_text);
+        setNotes([]);
       }
     }, 1000);
 
@@ -151,11 +164,12 @@ const MiniNote: React.FC<MiniNoteProps> = ({ projectId }) => {
   };
 
   const handleSelectNote = (note: Note) => {
-    setSelectedNote(note);
+    handleGetNoteById(note.note_id)
     setIsEditing(true);
   };
 
   const handleBackToList = () => {
+    handleGetNotes()
     setIsEditing(false);
     setSelectedNote(null);
   };
@@ -184,67 +198,83 @@ const MiniNote: React.FC<MiniNoteProps> = ({ projectId }) => {
           minHeight={450}
           maxHeight={600}
           bounds="window"
-          className="bg-white shadow-md rounded-lg border border-gray-300 z-50"
+          className="bg-white shadow-md rounded-lg border border-gray-300 dark:border-gray-900 z-50"
+          dragHandleClassName="drag-handle"
         >
           <div className="flex flex-col h-full">
-            <div className="flex justify-between items-center p-2 bg-gray-100 border-b rounded-t-lg">
+            <div className="drag-handle flex justify-between items-center p-2 bg-gray-100 dark:bg-zinc-800 border-b rounded-t-lg cursor-move">
               <h2 className="text-lg font-semibold">
                 {selectedNote ? (selectedNote.title) : (`NoteList`)}
-                </h2>
+              </h2>
               <button
                 onClick={toggleNotepad}
-                className="text-red-600 text-xl font-bold"
+                className="text-red-600 text-xl font-bold cursor-pointer"
               >
                 ×
               </button>
             </div>
-            <Menubar className="border-none border-b-1">
-              <MenubarMenu>
-                <MenubarTrigger>Note</MenubarTrigger>
-                <MenubarContent>
-                  <MenubarItem onClick={handleCreateNewNote}>
-                    New Note <MenubarShortcut>⌘T</MenubarShortcut>
-                  </MenubarItem>
-                  <MenubarItem onClick={handleBackToList}>
-                    Note List <MenubarShortcut>⌘N</MenubarShortcut>
-                  </MenubarItem>
-                </MenubarContent>
-              </MenubarMenu>
-              {isEditing && (
+            <div className="drag-handle border-none">
+              <Menubar className="border-none dark:bg-zinc-900 cursor-default rounded-none">
                 <MenubarMenu>
-                  <MenubarTrigger>Edit</MenubarTrigger>
+                  <MenubarTrigger className="cursor-pointer">Note</MenubarTrigger>
                   <MenubarContent>
-                    <MenubarItem>
-                      Undo <MenubarShortcut>⌘Z</MenubarShortcut>
+                    <MenubarItem className="cursor-pointer" onClick={handleCreateNewNote}>
+                      New Note <MenubarShortcut>⌘T</MenubarShortcut>
                     </MenubarItem>
-                    <MenubarItem>
-                      Redo <MenubarShortcut>⇧⌘Z</MenubarShortcut>
+                    <MenubarItem className="cursor-pointer" onClick={handleBackToList}>
+                      Note List <MenubarShortcut>⌘N</MenubarShortcut>
                     </MenubarItem>
                   </MenubarContent>
                 </MenubarMenu>
-              )}
-            </Menubar>
+                {isEditing && (
+                  <MenubarMenu>
+                    <MenubarTrigger className="cursor-pointer">Edit</MenubarTrigger>
+                    <MenubarContent>
+                      <MenubarItem className="cursor-pointer">
+                        Undo <MenubarShortcut>⌘Z</MenubarShortcut>
+                      </MenubarItem>
+                      <MenubarItem className="cursor-pointer">
+                        Redo <MenubarShortcut>⇧⌘Z</MenubarShortcut>
+                      </MenubarItem>
+                    </MenubarContent>
+                  </MenubarMenu>
+                )}
+              </Menubar>
+            </div>
           
-            <div className="flex-grow overflow-auto">
-              {isEditing && selectedNote ? (
-                <Editor
-                  editable={true}
-                  initialContent={selectedNote.content}
-                  onChange={handleEditorChange}
-                  docId={selectedNote.note_id}
-                />
-              ) : (
-                <NoteList 
-                  notes={notes} 
-                  onSelectNote={handleSelectNote}
-                  onUpdateNoteTitle={handleRenameNote}
-                  onDeleteNote={handleDeleteNote}
-                />
-              )}
+            <div className="flex-grow overflow-auto cursor-auto bg-[#ffffff] dark:bg-[#1f1f1f]">
+            {isLoading ? (
+              <div className="p-4 space-y-2">
+                <Skeleton className="h-3 w-full rounded-lg" />
+                <Skeleton className="h-3 w-3/5 rounded-lg" />
+                <Skeleton className="h-3 w-full rounded-lg" />
+                <Skeleton className="h-3 w-3/5 rounded-lg" />
+              </div>
+            ) : isEditing && selectedNote ? (
+              <Editor
+                editable={true}
+                initialContent={selectedNote.formatted_text}
+                onChange={handleEditorChange}
+                docId={selectedNote.note_id}
+              />
+            ) : (
+              <NoteList 
+                notes={notes} 
+                onSelectNote={handleSelectNote}
+                onUpdateNoteTitle={handleRenameNote}
+                onDeleteNote={handleDeleteNote}
+              />
+            )}
             </div>
           </div>
         </Rnd>
       )}
+
+      <style jsx global>{`
+        .drag-handle {
+          cursor: move;
+        }
+      `}</style>
     </div>
   );
 };

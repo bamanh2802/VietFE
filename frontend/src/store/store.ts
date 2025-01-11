@@ -1,18 +1,20 @@
 import { configureStore } from "@reduxjs/toolkit";
 
 import projectsReducer from "./projectsSlice";
-import userReducer from "./userSlice"; // Import userReducer
+import userReducer from "./userSlice";
 import chatReducer from "./chatSlice";
 import documentReducer from "./documentSlice";
 import conversationReducer from "./conversationSlice";
+import outlineReducer from "./outlineSlice"; // Import outlineReducer
 
 export const store = configureStore({
   reducer: {
-    projects: projectsReducer, // Nơi lưu trữ state của dự án
+    projects: projectsReducer,
     user: userReducer,
     chat: chatReducer,
     documents: documentReducer,
-    conversations: conversationReducer
+    conversations: conversationReducer,
+    outline: outlineReducer, // Thêm outlineReducer vào store
   },
 });
 

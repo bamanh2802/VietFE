@@ -125,7 +125,7 @@ const HomeMain: React.FC<HomeMainProps> = ({
   };
 
   const handleRouterToConversation = (conv: Conversation) => {
-    const url = `/project/${conv.project_id}/workspace/${conv.conversation_id}`;
+    const url = `/project/${conv.project_id}/conversation/${conv.conversation_id}`;
 
     window.open(url, "_blank");
   };
@@ -467,13 +467,13 @@ const HomeMain: React.FC<HomeMainProps> = ({
                           let imageSrc = "/img/default.png";
 
                           if (doc.type === "pdf") {
-                            imageSrc = "/img/pdf.png";
+                            imageSrc = "/img/pdf.jpg";
                           } else if (doc.type === "word") {
-                            imageSrc = "/img/word.png";
+                            imageSrc = "/img/word.jpg";
                           } else if (doc.type === "pptx") {
-                            imageSrc = "/img/pptx.png";
+                            imageSrc = "/img/pptx.jpg";
                           } else if (doc.type === "url") {
-                            imageSrc = "/img/website.png";
+                            imageSrc = "/img/website.jpg";
                           }
 
                           return (

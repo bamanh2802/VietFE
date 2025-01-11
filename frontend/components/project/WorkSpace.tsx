@@ -221,13 +221,13 @@ const WorkSpace: React.FC<WorkSpaceProps> = ({
                       let imageSrc = "/img/default.png";
 
                       if (doc.type === "pdf") {
-                        imageSrc = "/img/pdf.png";
+                        imageSrc = "/img/pdf.jpg";
                       } else if (doc.type === "word") {
-                        imageSrc = "/img/word.png";
+                        imageSrc = "/img/word.jpg";
                       } else if (doc.type === "pptx") {
-                        imageSrc = "/img/pptx.png";
+                        imageSrc = "/img/pptx.jpg";
                       } else if (doc.type === "url") {
-                        imageSrc = "/img/website.png";
+                        imageSrc = "/img/website.jpg";
                       }
 
                       return (

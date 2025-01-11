@@ -58,7 +58,7 @@ const chatSlice = createSlice({
     ) => {
       const { conversation_id, content } = action.payload;
       const conversation = state.conversations[conversation_id];
-
+      
       if (conversation) {
         const lastMessage =
           conversation.messages[conversation.messages.length - 1];

@@ -35,6 +35,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ToastAction } from "@/components/ui/toast";
 import { Document } from "@/src/types/types";
 
+import { useTranslations } from 'next-intl';
 import NewWorkspace from "../workspace/NewWorkspace";
 
 
@@ -75,6 +76,7 @@ const SidebarWorkspace: FC<SidebarWorkspaceProps> = ({
     useState<boolean>(false);
   const [documents, setDocuments] = useState<Document[]>([]);
 
+  const g = useTranslations('Global');
   const handleToggleNewConversation = () =>
     setOpenNewConversation(!openNewConversation);
   const handleDelete = async () => {
@@ -307,7 +309,7 @@ const SidebarWorkspace: FC<SidebarWorkspaceProps> = ({
           startContent={<MagnifyingGlassIcon className="w-4 h-4" />}
           variant="bordered"
         >
-          Search something...
+          {g('Search')}
         </Button>
         <h3 className="mt-5 flex items-center justify-between text-sm font-semibold dark:text-gray-400 text-gray-700 transition-all rounded-lg px-2 p-1 cursor-pointer hover:bg-zinc-200 dark:hover:bg-zinc-800">
           <span>Conversations</span>
@@ -328,7 +330,7 @@ const SidebarWorkspace: FC<SidebarWorkspaceProps> = ({
               >
                 <div className="flex items-center">
                   <PencilSquareIcon className="h-4 w-4 mr-2" />
-                  Rename
+                  {g('Rename')}
                 </div>
               </ListboxItem>
               <ListboxItem
@@ -340,7 +342,7 @@ const SidebarWorkspace: FC<SidebarWorkspaceProps> = ({
               >
                 <div className="flex items-center">
                   <TrashIcon className="h-4 w-4 mr-2" />
-                  Delete
+                  {g('Delete')}
                 </div>
               </ListboxItem>
             </Listbox>

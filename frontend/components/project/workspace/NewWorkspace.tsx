@@ -77,10 +77,10 @@ const NewWorkspace: FC<NewWorkspaceProps> = ({
   const handleRouterWorkspace = (conversationId: string) => {
     updateConversation();
     if (from === "project") {
-      const url = `/project/${projectId}/workspace/${conversationId}`;
+      const url = `/project/${projectId}/conversation/${conversationId}`;
       window.open(url, "_blank");
     } else if (from === "conversation") {
-      router.push(`/project/${projectId}/workspace/${conversationId}`);
+      router.push(`/project/${projectId}/conversation/${conversationId}`);
     }
   };
 

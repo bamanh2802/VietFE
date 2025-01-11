@@ -111,7 +111,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   const [selectedName, setSelectedName] = useState<string>("");
   const [isLoadingDelete, setIsLoadingDelete] = useState<boolean>(false);
 
-  const t = useTranslations('LandingPage');
+  const p = useTranslations('Project');
   const g = useTranslations('Global');
   const handleOpenRename = (docId: string) => {
     setRenameDocId(docId);
@@ -732,7 +732,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             >
               <div className="flex items-center">
                 <PlusIcon className="h-4 w-4 mr-2" />
-                Add Document
+                {p('AddDocument')}
               </div>
             </ListboxItem>
             <ListboxItem
@@ -742,7 +742,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             >
               <div className="flex items-center">
                 <ArrowTopRightOnSquareIcon className="h-4 w-4 mr-2" />
-                Detail
+                {g('Detail')}
               </div>
             </ListboxItem>
             <ListboxItem
@@ -752,7 +752,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             >
               <div className="flex items-center">
                 <PencilSquareIcon className="h-4 w-4 mr-2" />
-                Rename
+                {g('Rename')}
               </div>
             </ListboxItem>
             <ListboxItem
@@ -764,7 +764,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             >
               <div className="flex items-center">
                 <TrashIcon className="h-4 w-4 mr-2" />
-                Delete
+                {g('Delete')}
               </div>
             </ListboxItem>
           </Listbox>
@@ -779,7 +779,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             <ListboxItem key="create" textValue="Pop Up" onClick={onOpenDialog}>
               <div className="flex items-center">
                 <ChatBubbleLeftIcon className="h-4 w-4 mr-2" />
-                Create Conversation
+                {p('AddConversation')}
               </div>
             </ListboxItem>
             <ListboxItem key="popup" textValue="Pop Up">
@@ -788,7 +788,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                 onClick={() => handleRouterConversation(selectedId)}
               >
                 <ArrowTopRightOnSquareIcon className="h-4 w-4 mr-2" />
-                Detail
+                {g('Detail')}
               </div>
             </ListboxItem>
             <ListboxItem
@@ -798,7 +798,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             >
               <div className="flex items-center">
                 <PencilSquareIcon className="h-4 w-4 mr-2" />
-                Rename
+                {g('Rename')}
               </div>
             </ListboxItem>
             <ListboxItem
@@ -810,7 +810,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             >
               <div className="flex items-center">
                 <TrashIcon className="h-4 w-4 mr-2" />
-                Delete
+                {g('Delete')}
               </div>
             </ListboxItem>
           </Listbox>
@@ -832,7 +832,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             >
               <div className="flex items-center">
                 <ChatBubbleLeftIcon className="h-4 w-4 mr-2" />
-                Create Note
+                {p('AddNote')}
               </div>
             </ListboxItem>
             <ListboxItem
@@ -845,7 +845,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             >
               <div className="flex items-center">
                 <ArrowTopRightOnSquareIcon className="h-4 w-4 mr-2" />
-                Open
+                {g('Detail')}
               </div>
             </ListboxItem>
             <ListboxItem
@@ -855,7 +855,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             >
               <div className="flex items-center">
                 <PencilSquareIcon className="h-4 w-4 mr-2" />
-                Rename
+                {g('Rename')}
               </div>
             </ListboxItem>
             <ListboxItem
@@ -867,7 +867,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             >
               <div className="flex items-center">
                 <TrashIcon className="h-4 w-4 mr-2" />
-                Delete
+                {g('Delete')}
               </div>
             </ListboxItem>
           </Listbox>
@@ -882,12 +882,12 @@ const Sidebar: React.FC<SidebarProps> = ({
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center">
               <ExclamationCircleIcon className="w-6 h-6 mr-2" />
-              Do you really want to delete
+              {p('DeleteTitle')}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone.{" "}
-              <span className="font-bold">{selectedName}</span> cannot be
-              restored.
+              {p('DeleteDescription1')}{" "}
+              <span className="font-bold">{selectedName}</span> 
+              {p('DeleteDescription2')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -897,7 +897,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               isLoading={isLoadingDelete}
               onClick={() => handleDelete(selectedId)}
             >
-              Delete
+              {g('Delete')}
             </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -906,7 +906,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       <Dialog open={isUploadDocs} onOpenChange={() => setIsUploadDocs(false)}>
         <DialogContent>
           <div className="grid w-full max-w-sm items-center gap-1.5">
-            <label htmlFor="picture">Upload Your Documents</label>
+            <label htmlFor="picture">{p('UploadDocumentTitle')}</label>
             <Input id="picture" type="file" />
           </div>
         </DialogContent>

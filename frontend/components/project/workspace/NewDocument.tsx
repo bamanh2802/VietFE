@@ -268,7 +268,7 @@ const NewDocument: FC<NewDocumentProps> = ({
 
               <div className="mt-6">
                 <div className="flex justify-between items-center mb-2">
-                  <label className="text-sm font-medium text-zinc-600 dark:text-zinc-300">
+                  <label htmlFor="document" className="text-sm font-medium text-zinc-600 dark:text-zinc-300">
                     Giới hạn tài liệu
                   </label>
                   <span className={`text-sm font-medium ${isMaxFile ? "text-red-500" : "text-zinc-500 dark:text-zinc-400"}`}>

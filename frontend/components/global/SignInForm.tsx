@@ -244,7 +244,7 @@ const SignInForm: React.FC<SignInFormProps> = ({ isOpen, closeForm}) => {
                     type="submit"
                     isLoading={isLoadingSignin}
                   >
-                    {isLoadingSignin ? t('LoggingIn...') : t('Log in')}
+                    {isLoadingSignin ? t('LoggingIn') : t('Log in')}
                   </Button>
                 </form>
                 <div className="text-sm text-right mt-4">

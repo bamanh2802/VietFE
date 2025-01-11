@@ -19,7 +19,6 @@ import {
 import { ListboxWrapper } from "@/components/ListboxWrapper";
 import { getDocumentById, getDocumentInProject, getProjectById } from "@/service/projectApi";
 import { getConversationByDocument } from "@/service/documentApi";
-import { getAllProjects } from "@/service/apis";
 import { Document, Project, Conversation } from "@/src/types/types";
 import { createNewConversation } from "@/service/projectApi";
 import LoadingForSelect from "@/components/document/LoadingForSelect";
@@ -27,10 +26,15 @@ import { useToast } from "@/hooks/use-toast";
 
 import ChatWindow from "@/components/project/conversation/ChatWindow";
 
-import Analysis from "@/components/project/document/Analysis";
+import { useTranslations } from 'next-intl';
 import TextInteraction from "@/components/project/document/TextInteraction";
 import NavbarDocument from "@/components/project/document/NavbarDocument";
 import SidebarDocument from "@/components/project/document/SidebarDocument";
+import MindMap from "@/components/global/Mindmap";
+
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from "@/src/store/store";
+import { setOutlineContent, clearOutlineContent } from "@/src/store/outlineSlice";
 
 interface DocumentPageProps {
     params: { project_id: string, document_id: string }
@@ -45,7 +49,6 @@ const DocumentPage: React.FC<DocumentPageProps> = ({params}) => {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [conversation, setConversations] = useState<Conversation[]>([]);
-  const [projectName, setProjectName] = useState<string>("Loading...");
   const [documentName, setDocumentName] = useState<string>("Loading...");
   const [isLoadingCreate, setIsLoadingCreate] = useState<boolean>(false);
   const [projectInfo, setProjectInfo] = useState<Project>()
@@ -63,10 +66,26 @@ const DocumentPage: React.FC<DocumentPageProps> = ({params}) => {
     tabId: null,
   });
   const [selectedConversation, setSelectedConversation] = useState<string>("");
+  const dispatch = useDispatch();
+  const outlineContent = useSelector((state: RootState) => state.outline.content); 
 
+  const g = useTranslations('Global');
   const containerRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+  const [isMindMapVisible, setMindMapVisible] = useState(true);
 
+  useEffect(() => {
+    if (outlineContent.trim() !== '') {
+      setMindMapVisible(true);
+    } else {
+      setMindMapVisible(false);
+    }
+  }, [outlineContent]);
+
+  const handleCloseMindMap = () => {
+    setMindMapVisible(true)
+    dispatch(clearOutlineContent());
+  }
   // Handle click outside the context menu
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -94,8 +113,8 @@ const DocumentPage: React.FC<DocumentPageProps> = ({params}) => {
       toast({
         description: "Create new conversation successfully!",
       });
-      handleGetConversations();
       setSelectedConversation(data.data.conversation_id);
+      handleGetConversations();
     } catch (e) {
       toast({
         description: "Create new conversation failed!",
@@ -117,9 +136,6 @@ const DocumentPage: React.FC<DocumentPageProps> = ({params}) => {
         (conv: Conversation) => conv.conversation_id === selectedConversation,
       );
 
-      if (!conversationExists) {
-        setSelectedConversation("");
-      }
 
       setConversations(sortedConversations);
     } catch (e) {
@@ -204,7 +220,7 @@ const DocumentPage: React.FC<DocumentPageProps> = ({params}) => {
   return (
     <ResizablePanelGroup className="w-screen h-screen" direction="horizontal">
       <Head>
-        <title>Document</title>
+        <title>{g('Documents')}</title>
       </Head>
       <div ref={containerRef} className="flex h-full relative w-full">
         <SidebarDocument
@@ -237,7 +253,7 @@ const DocumentPage: React.FC<DocumentPageProps> = ({params}) => {
                   >
                     <Tab
                       key="Conversations"
-                      title="Conversations" // Thêm aria-label cho icon
+                      title={g('Documents')}
                     >
                       <>
                         {selectedConversation === "" ? (
@@ -249,17 +265,12 @@ const DocumentPage: React.FC<DocumentPageProps> = ({params}) => {
                             project_id={project_id as string}
                             content={contentChat}
                             option={optionChat}
+                            documentId={document_id}
                           />
                         )}
                       </>
                     </Tab>
 
-                    {/* Analysis Tab */}
-                    <Tab key="analysis" title="Analysis">
-                      <div className="flex justify-center items-center h-full">
-                        <Analysis documentName={documentName}/>
-                      </div>
-                    </Tab>
                   </Tabs>
 
                   {/* Context Menu for Chat Tabs */}
@@ -308,10 +319,30 @@ const DocumentPage: React.FC<DocumentPageProps> = ({params}) => {
 
               <ResizablePanel minSize={20}>
                 <div className="flex-1 h-full">
-                  <TextInteraction 
-                  handleActionDocument={handleActionDocument}
-                  params={params}
-                  />
+                  <ResizablePanelGroup direction="vertical">
+                  <ResizablePanel minSize={10} defaultSize={50}>
+                    <div className="flex h-full items-center justify-center">
+                      <TextInteraction 
+                        handleActionDocument={handleActionDocument}
+                        params={params}
+                        />
+                    </div>
+                  </ResizablePanel>
+                  <ResizableHandle />
+                  {isMindMapVisible && (
+                    <ResizablePanel minSize={10} defaultSize={50}>
+                      <div className="relative flex flex-col h-full items-center justify-center p-6">
+                        <button
+                          className="absolute top-1 right-1 mb-4 p-2 rounded"
+                          onClick={handleCloseMindMap}
+                        >
+                          Close
+                        </button>
+                        <MindMap input={outlineContent} />
+                      </div>
+                    </ResizablePanel>
+                  )}
+                  </ResizablePanelGroup>
                 </div>
               </ResizablePanel>
             </ResizablePanelGroup>

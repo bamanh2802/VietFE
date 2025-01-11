@@ -22,6 +22,8 @@ interface SearchComponentProps {
   onClose: () => void;
 }
 
+
+
 const SearchComponent: React.FC<SearchComponentProps> = ({
   onClose,
   isOpen,
@@ -48,6 +50,9 @@ const SearchComponent: React.FC<SearchComponentProps> = ({
   useEffect(() => {
     const debounceTimeout = setTimeout(() => {
       if (searchTerm) {
+        setIsLoading(true);
+        setResultDocument([])
+        setFilteredNotes([])
         handleSearch();
       } else {
         setFilteredDocuments([]);
@@ -63,7 +68,7 @@ const SearchComponent: React.FC<SearchComponentProps> = ({
 
 
   const handleRouterToConversation = (conv: Conversation) => {
-    const url = `/project/${conv.project_id}/workspace/${conv.conversation_id}`;
+    const url = `/project/${conv.project_id}/conversation/${conv.conversation_id}`;
     window.open(url, "_blank");
   };
 
@@ -72,16 +77,25 @@ const SearchComponent: React.FC<SearchComponentProps> = ({
     window.open(url, "_blank");
   };
 
+  const handleRouterToResultDocument = (document: DocumentSearch) => {
+    // const url = `/project/${document.project_id}/document/${document.document_id}`;
+    // window.open(url, "_blank");
+  }
+  const handleRouterToResultNote = (note: NoteSearch) => {
+    // const url = `/project/${document.project_id}/document/${document.document_id}`;
+    // window.open(url, "_blank");
+  }
+
   const handleRouterToProject = (project: Project) => {
     router.push(`/project/${project.project_id}`);
   };
 
   const handleSearchKeyword = async (keyword: string) => {
+    setIsLoading(true);
     const documentIds = documents.map((document) => document.document_id);
     const projectIds = projects.map((project) => project.project_id);
     const conversationIds = conversations.map((conversation) => conversation.conversation_id);
   
-    setIsLoading(true);
   
     try {
       const apiCalls = [];
@@ -102,10 +116,11 @@ const SearchComponent: React.FC<SearchComponentProps> = ({
   
       if (documentResults) {
         setResultDocument(documentResults.data)
+        console.log(documentResults.data)
       }
   
       if (conversationResults) {
-        console.log("Conversation Results:", conversationResults);
+        // console.log("Conversation Results:", conversationResults);
       }
   
       if (noteResults) {
@@ -132,15 +147,14 @@ const SearchComponent: React.FC<SearchComponentProps> = ({
   
 
   const handleSearch = () => {
+ 
     handleSearchKeyword(searchTerm)
-    // Filter documents
     const docs = documents.filter((doc) =>
       doc.document_name.toLowerCase().includes(searchTerm.toLowerCase()),
     );
 
     setFilteredDocuments(docs);
 
-    // Filter notes
     const nts = notes.filter((note) => {
       const titleMatch = note.title
         .toLowerCase()
@@ -154,14 +168,12 @@ const SearchComponent: React.FC<SearchComponentProps> = ({
 
     setFilteredNotes(nts);
 
-    // Filter projects
     const prj = projects.filter((project) =>
       project.name.toLowerCase().includes(searchTerm.toLowerCase()),
     );
 
     setFilteredProjects(prj);
 
-    // Filter conversations
     const convs = conversations.filter((conversation) =>
       conversation.conversation_name
         .toLowerCase()
@@ -171,6 +183,16 @@ const SearchComponent: React.FC<SearchComponentProps> = ({
     setFilteredConversations(convs);
   };
 
+  const highlightText = (text: string, searchTerm: string) => {
+    if (!searchTerm) return text;
+    const regex = new RegExp(`(${searchTerm})`, 'gi'); // Biểu thức chính quy để tìm kiếm từ khóa
+    return text.split(regex).map((part, index) =>
+      part.toLowerCase() === searchTerm.toLowerCase() ? (
+        <strong key={index} className="text-bold">{part}</strong>
+      ) : part
+    );
+  };
+  
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="lg">
       <ModalContent className="dark:bg-zinc-900 bg-slate-50">
@@ -196,9 +218,7 @@ const SearchComponent: React.FC<SearchComponentProps> = ({
             filteredProjects.length > 0 ||
             filteredConversations.length > 0 ||
             resultNote.length > 0 ||
-            resultDocument.length > 0
-            
-            ? (
+            resultDocument.length > 0 ? (
               <div className="space-y-4">
                 {/* Document section */}
                 {filteredDocuments.length > 0 && (
@@ -219,7 +239,7 @@ const SearchComponent: React.FC<SearchComponentProps> = ({
                         >
                           <span className="flex items-center">
                             <DocumentTextIcon className="w-4 h-4 mr-2" />
-                            {doc.document_name}
+                            {highlightText(doc.document_name, searchTerm)}
                           </span>
                         </ListboxItem>
                       ))}
@@ -244,7 +264,7 @@ const SearchComponent: React.FC<SearchComponentProps> = ({
                         >
                           <span className="flex items-center">
                             <DocumentTextIcon className="w-4 h-4 mr-2" />
-                            {note.title}
+                            {highlightText(note.title, searchTerm)}
                           </span>
                         </ListboxItem>
                       ))}
@@ -270,7 +290,7 @@ const SearchComponent: React.FC<SearchComponentProps> = ({
                         >
                           <span className="flex items-center">
                             <UserGroupIcon className="w-4 h-4 mr-2" />
-                            {project.name}
+                            {highlightText(project.name, searchTerm)}
                           </span>
                         </ListboxItem>
                       ))}
@@ -296,14 +316,14 @@ const SearchComponent: React.FC<SearchComponentProps> = ({
                         >
                           <span className="flex items-center">
                             <ChatBubbleLeftIcon className="w-4 h-4 mr-2" />
-                            {conversation.conversation_name}
+                            {highlightText(conversation.conversation_name, searchTerm)}
                           </span>
                         </ListboxItem>
                       ))}
                     </Listbox>
                   </div>
                 )}
-
+                {/* Note Content section */}
                 {resultNote.length > 0 && (
                   <div>
                     <h3 className="mb-2 text-sm font-semibold text-gray-400">
@@ -320,17 +340,18 @@ const SearchComponent: React.FC<SearchComponentProps> = ({
                           }
                         >
                           <span className="flex items-center">
-                            <UserGroupIcon className="w-4 h-4 mr-2" />
-                            {note?.note_title}
+                            <DocumentTextIcon className="w-4 h-4 mr-2" />
+                            {highlightText(note?.note_title, searchTerm)}
                           </span>
                           <span className="ml-5 truncate w-full">
-                            {note.note_content}
+                            {highlightText(note.note_content, searchTerm)}
                           </span>
                         </ListboxItem>
                       ))}
                     </Listbox>
                   </div>
                 )}
+                {/* Document Content section */}
                 {resultDocument.length > 0 && (
                   <div>
                     <h3 className="mb-2 text-sm font-semibold text-gray-400">
@@ -347,11 +368,11 @@ const SearchComponent: React.FC<SearchComponentProps> = ({
                           }
                         >
                           <span className="flex items-center">
-                            <UserGroupIcon className="w-4 h-4 mr-2" />
-                            {document.document_name}
+                            <DocumentTextIcon className="w-4 h-4 mr-2" />
+                            {highlightText(document.document_name, searchTerm)}
                           </span>
                           <span className="ml-5 truncate w-full">
-                            {document.content}
+                            {highlightText(document.content, searchTerm)}
                           </span>
                         </ListboxItem>
                       ))}
@@ -376,9 +397,9 @@ const SearchComponent: React.FC<SearchComponentProps> = ({
                     <Spinner color="default" />
                   </div>
                 ) : (
-                  <ScrollArea>
-                    <p className="text-center text-gray-400">No recent searches</p>
-                  </ScrollArea>
+                  <div className="w-full text-center text-gray-400">
+                    Không có kết quả tìm kiếm nào.
+                  </div>
                 )}
               </>
             )}
@@ -387,6 +408,7 @@ const SearchComponent: React.FC<SearchComponentProps> = ({
       </ModalContent>
     </Modal>
   );
+  
 };
 
 export default SearchComponent;

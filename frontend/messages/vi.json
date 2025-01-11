@@ -39,7 +39,7 @@
     "Not a member yet?": "Chưa có tài khoản?",
     "Register now": "Đăng ký ngay",
     "Log in": "Đăng nhập",
-    "LoggingIn..." : "Đang đăng nhập",
+    "LoggingIn" : "Đang đăng nhập",
     "Log in now": "Đăng nhập ngay",
     "Forgot your password?": "Quên mật khẩu?",
     "Or sign in with": "Hoặc đăng nhập với",
@@ -89,6 +89,67 @@
     "Add": "Thêm",
     "Images": "Hình ảnh",
     "New": "Mới",
-    "Detail": "Chi tiết"
+    "Detail": "Chi tiết",
+    "Edit": "Chỉnh sửa",
+    "NewConversation": "Cuộc trò chuyện mới",
+    "Copy": "Sao chép",
+    "Explain": "Giải thích",
+    "AddToNote": "Thêm vào ghi chú",
+    "Quote": "Trích dẫn",
+    "Translate": "Dịch"
+  },
+
+  "Document": {
+    "Search in project": "Tìm kiếm trong dự án",
+    "No rencent searches": "Không có dự án gần đây",
+    "Conversations": "Các cuộc trò chuyện",
+    "Analysis": "Phân tích",
+    "No Conversation Selected": "Không có cuộc trò chuyện nào được chọn",
+    "Please select or create a conversation from the sidebar to start chatting": "Vui lòng chọn hoặc tạo cuộc trò chuyện từ thanh bên để bắt đầu trò chuyện",
+    "Raw":"Dữ liệu gốc",
+    "Chunks": "Phân đoạn",
+    "DeleteTitle": "Xóa cuộc trò chuyện này?",
+    "DeleteDescription1": "Bạn Không thể hoàn tác hành động này",
+    "DeleteDescription2": "sẽ không thể khôi phục.",
+    "NoConversation": "Không có cuộc trò chuyện nào"
+
+  },
+
+  "Option": {
+    "Settings": "Cài đặt",
+    "Analytics": "Phân tích",
+    "Help & Feedback": "Hỗ trợ & Phản hồi",
+    "Log Out": "Đăng xuất"
+    
+  },
+
+  "Setting": {
+    "My Profile": "Hồ sơ của tôi",
+    "Security": "Bảo mật",
+    "System": "Hệ thống",
+    "Personal Infomation": "Thông tin cá nhân",
+    "First Name":"Tên đầu tiên",
+    "Last name": "Họ",
+    "Email address": "Địa chỉ email",
+    "Phone": "Số điện thoại",
+    "Date of Birth": "Ngày sinh",
+    "Password": "Mật khẩu",
+    "The email address associated with your account": "Địa chỉ email được liên kết với tài khoản của bạn",
+    "Set a unique password to protect your account": "Đặt mật khẩu duy nhất để bảo vệ tài khoản của bạn",
+    "2-step verification": "Xác minh 2 bước",
+    "Make your account extra secure": "Bảo mật tài khoản của bạn hơn",
+    "Along with your password, you will need to enter a code": "Cùng với mật khẩu của bạn, bạn sẽ cần phải nhập một mã",
+    "Delete Account": "Xóa tài khoản",
+    "This will delete your account permanently": "Điều này sẽ xóa tài khoản của bạn vĩnh viễn",
+    "Change Password": "Đổi mật khẩu"
+  },
+  "Project": {
+    "AddDocument": "Thêm tài liệu",
+    "AddConversation": "Thêm cuộc trò chuyện",
+    "AddNote": "Thêm ghi chú",
+    "UploadDocumentTitle": "Upload Your Documents",
+    "DeleteTitle": "Do you really want to delete",
+    "DeleteDescription1": "Bạn Không thể hoàn tác hành động này",
+    "DeleteDescription2": "sẽ không thể khôi phục."
   }
 }

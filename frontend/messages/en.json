@@ -1,5 +1,152 @@
 {
-    "About": {
-      "title": "About hihi"
-    }
+  "LandingPage": {
+    "HeroTitle": "AI Tools",
+    "Home": "Home",
+    "Feature": "Features",
+    "Pricing": "Payment",
+    "HeroDescription": "Organize, analyze and share knowledge effectively with the power of AI.",
+    
+    "FeatureTitle": "Powerful features to help you manage all your knowledge.",
+    "FeatureDescription": "Integrated right into your workspace, Viet is ready to brainstorm, summarize, support writing and search for everything you need.",
+    "FeatureCard1Title": "Easy to share",
+    "FeatureCard1Description": "Share your work with just 1 link",
+    "FeatureCard2Title": "Project collaboration",
+    "FeatureCard2Description": "Work together on shared projects",
+    "FeatureCard3Title": "Powered by AI",
+    "FeatureCard3Description": "Leverage collective intelligence with the help of AI",
+    "FeatureCard4Title": "Knowledge exchange",
+    "FeatureCard4Description": "Learn from others and contribute your expertise",
+    
+    "FeaturePreviewTitle": "Handy apps to work with",
+    "FeaturePreviewCard1Title": "Flexible note editor: Flexibility at your fingertips",
+    "FeaturePreviewCard1Description": "From simple lists to detailed documents, our easy-to-use editor helps you manage notes quickly and efficiently. Explore creativity and organization with ease.",
+    "FeaturePreviewCard2Title": "Utilities",
+    "FeaturePreviewCard2Description": "Each section of the editor displays relevant options when you right-click on items like chat, menu, sidebar, and homepage",
+    "FeaturePreviewCard3Title": "Upload, share, and preview any file",
+    "FeaturePreviewCard3Description": "Easily upload files, explore content with AI-powered insights, and engage in conversations with data-driven chatbots. Share documents securely and optimize team work efficiently",
+    
+    "FeedbackTitle": "What our customers say",
+    "FeedbackDescription": "Explore the impact we've made through customer stories. Real-life success stories, collaborations and innovations that demonstrate the value we bring to their projects",
+    "FeedbackCardCard1Title": "Viet has truly transformed the way we approach knowledge management. The ability to seamlessly integrate multiple documents and instantly retrieve key information has dramatically improved our workflow. It's like having a personal research assistant available 24/7!",
+    "FeedbackCardCard2Title": "Viet's AI-powered chat tool has made it easier than ever for our team to collaborate and share knowledge. With the ability to quickly search and extract information from documents, our productivity has skyrocketed!",
+    "FeedbackCardCard3Title": "As a researcher, I am particularly impressed with Viet's user interface. The ability to visually tag and organize information makes managing and researching knowledge easier than ever. This is truly a breakthrough!"
+  },
+  
+  "SigninForm": {
+    "Welcome!": "Hello",
+    "Not a member yet?": "Don't have an account yet?",
+    "Register now": "Register now",
+    "Log in":"Logging in",
+    "Log in now": "Log in now",
+    "Forgot your password?": "Forgot your password?",
+    "Or sign in with": "Or sign in with",
+    "Not a member": "Don't have an account yet? sign up",
+    "Already have an account?": "Already have an account?",
+    "Sign in": "Sign in",
+    "LoggingIn": "LoggingIn",
+    "RegisterTitle": "Register with your email",
+    "CreateAccount": "Create account",
+    "CreatingAccount": "Creating...",
+    "OrRegisterWith": "Or register with",
+    "AskForLogin": "Already have an account? Sign In",
+    "AgreeWithTerm": "I agree to",
+    "TermAndConditions": "Terms and Conditions"
+  },
+  
+  "Home": {
+    "QuickAccess": "Quick Access",
+    "NewProject": "New Project",
+    "Recent": "Recent",
+    "AllProjects": "All Projects",
+    "RecentProject": "Recent Projects",
+    "RecentDocuments": "Recent Documents",
+    "RecentConversations": "Recent Conversations",
+    "CreateProject": "Create Project",
+    "CreateProjectDescription": "Create a new project in just 1 step",
+    "CreateProjectPlaceholder": "Name of the project",
+    "EditProject": "Edit Project",
+    "EditProjectDescription": "Edit the name of the project",
+    "DeleteProjectTitle": "Do you really want to delete",
+    "DeleteProjectDescription": "This action cannot be undone. Project cannot be restored."
+  },
+  
+  "Global": {
+    "Search": "Search",
+    "Projects": "Project",
+    "Documents": "Documents",
+    "Conversations": "Conversations",
+    "Rename": "Rename",
+    "Delete": "Delete",
+    "Cancel": "Cancel",
+    "Create": "Create",
+    "Name": "Name",
+    "Save": "Save",
+    "Notes": "Notes",
+    "Home": "Home",
+    "Add": "Add",
+    "Images": "Images",
+    "New": "New",
+    "Detail": "Details",
+    "Edit": "Edit",
+    "NewConversation": "New Conversation",
+    "Copy": "Copy",
+    "Explain": "Explain",
+    "AddToNote": "Add to Note",
+    "Quote": "Quote",
+    "Translate": "Translate"
+  },
+
+
+  "Document": {
+    "Search in project": "Search in project",
+    "No recent searches": "No recent projects",
+    "Conversations": "Conversations",
+    "Analysis": "Analysis",
+    "No Conversation Selected": "No conversations selected",
+    "Please select or create a conversation from the sidebar to start chatting": "Please select or create a conversation from the sidebar to start chatting",
+    "Raw":"Raw",
+    "Chunks": "Chunks",
+    "DeleteTitle": "Do you really want to delete",
+    "DeleteDescription1": "This action cannot be undone.",
+    "DeleteDescription2": "cannot be restored.",
+    "NoConversation": "No Conversation"
+    },
+
+  "Option": {
+    "Settings": "Settings",
+    "Analytics": "Analytics",
+    "Help & Feedback": "Support & Feedback",
+    "Log Out": "Log Out"
+
+    },
+
+  "Setting": {
+    "My Profile": "My Profile",
+    "Security": "Security",
+    "System": "System system",
+    "Personal Infomation": "Personal Information",
+    "First Name": "First Name",
+    "Last name": "Last Name",
+    "Email address": "Email address",
+    "Phone": "Phone number",
+    "Date of Birth": "Date of Birth",
+    "Password": "Password",
+    "The email address associated with your account": "The email address associated with your account",
+    "Set a unique password to protect your account": "Set a unique password to protect your account",
+    "2-step verification": "2-step verification",
+    "Make your account extra secure": "Make your account more secure",
+    "Along with your password, you will need to enter a code": "Along with your password, you will need to enter a code",
+    "Delete Account": "Delete account",
+    "This will delete your account permanently": "This will delete your account permanently",
+    "Change Password": "Change Password"
+  },
+  "Project": {
+    "AddDocument": "Thêm tài liệu",
+    "AddConversation": "Thêm cuộc trò chuyện",
+    "AddNote": "Thêm ghi chú",
+    "UploadDocumentTitle": "Upload Your Documents",
+    "DeleteTitle": "Do you really want to delete",
+    "DeleteDescription1": "This action cannot be undone.",
+    "DeleteDescription2": "cannot be restored."
   }
+}

@@ -62,7 +62,7 @@ const ProjectPage: React.FC<ProjectPageProps> = ({ params }) => {
 
 
   useEffect(() => {
-    if(noteIdParam !== undefined && noteIdParam !== selectedNote) {
+    if(noteIdParam !== undefined && noteIdParam !== selectedNote && noteIdParam !== null) {
       setSelectedNote(noteIdParam as string)
       handleGetNoteById(noteIdParam as string)
     }
@@ -89,14 +89,12 @@ const ProjectPage: React.FC<ProjectPageProps> = ({ params }) => {
   const handleEditNote = async (noteId: string, content: string, formatted_text: string) => {
     try {
       const data = await editNote(noteId, content, formatted_text);
-      console.log(data);
     } catch (e) {
       console.log(e);
     }
   };
 
   const handleGetNoteById = async (noteId: string) => {
-    console.log(noteId)
     try {
       const data = await getNoteById(noteId);
       console.log(data)
