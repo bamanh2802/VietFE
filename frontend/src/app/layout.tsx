@@ -7,20 +7,22 @@ import "@/styles/globals.css";
 import "@/styles/config.css";
 import "remixicon/fonts/remixicon.css";
 
+// Metadata configuration
 export const metadata: Metadata = {
   title: "Viet",
   description: "Your app description",
-  // Add more metadata properties as needed
-  viewport: "width=device-width, initial-scale=1",
   icons: {
     icon: "/favicon.ico",
   },
 };
 
+// Export viewport independently
+export const viewport = "width=device-width, initial-scale=1";
+
 type Props = {
   children: ReactNode;
   params: { locale: string }
-}
+};
 
 export default async function RootLayout({
   children,
@@ -29,7 +31,7 @@ export default async function RootLayout({
   const messages = await getMessages();
 
   return (
-    <html lang={locale} suppressHydrationWarning>
+    <html dir='ltr' lang={locale} suppressHydrationWarning>
       <head>
         <meta charSet="utf-8" />
       </head>

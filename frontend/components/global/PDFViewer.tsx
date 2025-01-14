@@ -14,12 +14,6 @@ interface FileViewerProps {
 
 const FileViewer: React.FC<FileViewerProps> = ({ fileUrl, fileType, isDocument }) => {
   if (fileType !== 'pdf') return null;
-
-  useEffect(()=> {
-    console.log(fileUrl, fileType)
-  }, [fileUrl, fileType])
-
-  // Plugin mặc định với các tính năng đầy đủ
   const defaultLayoutPluginInstance = defaultLayoutPlugin({
     sidebarTabs: () => [],
     toolbarPlugin: {

@@ -1,5 +1,5 @@
 import { useTranslations } from 'next-intl';
-import Image from 'next/image'; // Import Image từ next/image
+import Image from 'next/image'; 
 
 export interface TestimonialProps {
   image: string;
@@ -17,9 +17,9 @@ export const TestimonialCard = ({ image, name, role, content }: TestimonialProps
           <Image
             loading="lazy"
             src={image}
-            alt={`${name}'s profile`} // Sửa alt để không chứa "image"
-            width={40} // Đặt kích thước cụ thể cho width
-            height={40} // Đặt kích thước cụ thể cho height
+            alt={`${name}'s profile`} 
+            width={40} 
+            height={40} 
             className="object-contain shrink-0 self-stretch my-auto w-10 rounded-xl aspect-square"
           />
           <div className="flex flex-col self-stretch my-auto w-40">

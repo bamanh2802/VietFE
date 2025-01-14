@@ -15,6 +15,7 @@ import dayjs from "dayjs"; // Thư viện để xử lý ngày tháng
 import { EllipsisHorizontalIcon } from "@heroicons/react/24/outline";
 import { Listbox, ListboxItem, Button } from "@nextui-org/react";
 import MiniNote from "@/components/document/MiniNote";
+import {ChatBubbleLeftIcon} from "@heroicons/react/24/outline";
 
 import { Conversation } from "@/src/types/types";
 import { ListboxWrapper } from "@/components/ListboxWrapper";
@@ -45,6 +46,7 @@ interface SidebarWorkspaceProps {
   updatedConversations: () => void;
   projectId: string;
   params: { project_id: string, conversation_id: string }
+  isOpen: boolean
 }
 
 const SidebarWorkspace: FC<SidebarWorkspaceProps> = ({
@@ -52,7 +54,8 @@ const SidebarWorkspace: FC<SidebarWorkspaceProps> = ({
   conversations,
   updatedConversations,
   projectId,
-  params
+  params,
+  isOpen
 }) => {
   const router = useRouter();
   const { toast } = useToast();
@@ -77,6 +80,15 @@ const SidebarWorkspace: FC<SidebarWorkspaceProps> = ({
   const [documents, setDocuments] = useState<Document[]>([]);
 
   const g = useTranslations('Global');
+
+  useEffect(()=> {
+    if(!isOpen) {
+      setIsCompactSidebar(true)
+    } else {
+      setIsCompactSidebar(false)
+    }
+
+  }, [isOpen])
   const handleToggleNewConversation = () =>
     setOpenNewConversation(!openNewConversation);
   const handleDelete = async () => {
@@ -257,8 +269,6 @@ const SidebarWorkspace: FC<SidebarWorkspaceProps> = ({
         Không có cuộc trò chuyện nào.
       </div>
     );
-
-  // Đóng menu context khi nhấp ra ngoài
   useEffect(() => {
     const handleClickOutside = () => setContextMenu({ x: 0, y: 0, id: null });
 
@@ -271,7 +281,7 @@ const SidebarWorkspace: FC<SidebarWorkspaceProps> = ({
 
   return (
     <div
-      className={`${isCompactSidebar ? "w-14 p-1" : "w-60 p-4"} h-screen dark:bg-zinc-900 bg-zinc-50 flex flex-col`}
+      className={`${isCompactSidebar ? "w-14 p-1" : "w-60 p-4"} transition-all h-screen dark:bg-zinc-900 bg-zinc-50 flex flex-col`}
     >
       <div className="flex justify-between items-center">
         <Button
@@ -293,26 +303,33 @@ const SidebarWorkspace: FC<SidebarWorkspaceProps> = ({
             className="flex dark:text-gray-400 text-gray-700 transition-all p-3 rounded-lg cursor-pointer my-2 hover:bg-zinc-200 dark:hover:bg-zinc-800"
             onClick={() => handleBackHome()}
           >
-            <div className="flex items-center space-x-3">
+            <div className={`flex items-center ${isCompactSidebar ? '' : 'space-x-3'}`}>
               <HomeIcon className="h-4 w-4 text-gray-300" />
-              <span className="text-xs">Home</span>
+              {!isCompactSidebar && (
+                <span className="text-xs">Home</span>
+              )}
             </div>
           </div>
         </div>
 
-      <MiniNote projectId={projectId}/>
+      {!isCompactSidebar && (
+        <MiniNote projectId={projectId}/>
+      )}
 
 
         <Button
+          isIconOnly={isCompactSidebar}
           className="w-full mt-3"
           size="sm"
           startContent={<MagnifyingGlassIcon className="w-4 h-4" />}
-          variant="bordered"
         >
-          {g('Search')}
+          {!isCompactSidebar ? g('Search') : ''}
+
         </Button>
         <h3 className="mt-5 flex items-center justify-between text-sm font-semibold dark:text-gray-400 text-gray-700 transition-all rounded-lg px-2 p-1 cursor-pointer hover:bg-zinc-200 dark:hover:bg-zinc-800">
-          <span>Conversations</span>
+          <span>
+          {!isCompactSidebar ? g('Conversations') : <ChatBubbleLeftIcon className="w-4 h-4" />}
+          </span>
         </h3>
         {renderConversations()}
 

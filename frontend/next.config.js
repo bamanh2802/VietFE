@@ -4,7 +4,7 @@ const withNextIntl = createNextIntlPlugin();
 const nextConfig = {
   reactStrictMode: false,
   images: {
-    domains: ["developers.elementor.com"],
+    domains: ['cdn.builder.io'],
   },
   serverExternalPackages: ['@react-pdf/renderer'],
   webpack: (config) => {

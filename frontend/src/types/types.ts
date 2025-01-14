@@ -101,3 +101,7 @@ export interface DocumentSearch {
   document_id: string,
   document_name: string
 }
+
+export interface ChunksState {
+  [documentId: string]: Chunk[]; 
+}

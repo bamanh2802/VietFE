@@ -1,40 +1,41 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import MarkdownRenderer from './CodeBlock';
-import { useSelector } from 'react-redux';
-import { RootState } from '@/src/store/store';
-
+import { Document, ChunksState } from "@/src/types/types";
 
 interface TypingMessageProps {
   message: string;
+  documents: Document[];
+  chunksState: ChunksState;
+  isDocument: boolean
 }
 
-const TypingMessage: React.FC<TypingMessageProps> = ({ message }) => {
-  const [displayedText, setDisplayedText] = useState<string>('');
-  const [index, setIndex] = useState<number>(0);
-  const conversation = useSelector(
-    (state: RootState) =>
-      state.chat.conversations
-  );
 
-  useEffect(() => {
-    if (index < message.length) {
+const TypingMessage = React.memo(({ message, documents, chunksState, isDocument }: TypingMessageProps) => {
+  const [displayedText, setDisplayedText] = useState('');
+  const animateText = useCallback(() => {
+    if (displayedText.length < message.length) {
       const timeout = setTimeout(() => {
-        setDisplayedText((prev) => prev + message[index]);
-        setIndex((prevIndex) => prevIndex + 1);
-      }, 10); 
+        setDisplayedText(message.slice(0, displayedText.length + 1));
+      }, 5);
 
       return () => clearTimeout(timeout);
     }
-  }, [index, message]);
+  }, [message, displayedText]);
 
   useEffect(() => {
-    if (message.length > displayedText.length) {
-      setIndex(displayedText.length); 
+    animateText();
+  }, [animateText]);
+
+  // Reset displayedText when message changes completely
+  useEffect(() => {
+    if (!message.startsWith(displayedText)) {
+      setDisplayedText('');
     }
   }, [message, displayedText]);
 
-  return  <MarkdownRenderer content={displayedText}/>
+  return <MarkdownRenderer content={displayedText} documents={documents} chunksState={chunksState} isDocument={isDocument}/>;
+});
 
-};
+TypingMessage.displayName = 'TypingMessage';
 
 export default TypingMessage;

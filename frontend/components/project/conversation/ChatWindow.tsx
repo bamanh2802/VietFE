@@ -8,6 +8,7 @@ import React, {
   useRef,
   FormEvent,
   MouseEvent,
+  useCallback,
 } from "react";
 import {
   Button,
@@ -37,6 +38,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { TranslationPopup } from "@/components/global/Translate";
 import { Card, CardBody, CardHeader } from "@nextui-org/react";
+import {Spinner} from "@nextui-org/spinner";
 import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { v4 as uuidv4 } from "uuid";
@@ -51,14 +53,10 @@ import {
   addChatHistory
 } from "@/src/store/chatSlice";
 import { RootState } from "@/src/store/store";
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "@/components/ui/hover-card";
+
 import { useToast } from "@/hooks/use-toast";
 import { getDocumentsByConversation } from "@/service/documentApi";
-import { Document, Message} from "@/src/types/types";
+import { Document, Message, Chunk} from "@/src/types/types";
 import { createNewNote } from "@/service/noteApi";
 import DocumentViewer from "@/components/global/DocumentViewer";
 import BotLoading from "@/public/svg/activity.json";
@@ -71,6 +69,8 @@ import { QuickiesDefine,
   QuickiesGatherInfo, 
   QuickiesSearchWeb, 
   QuickiesSearchWiki } from "@/service/chatbot";
+import { getChunkDocument } from "@/service/documentApi";
+import { setChunksForDocument } from "@/src/store/chunkSlice";
 import {
   summarizeDocument,
   shallowOutlineDocument,
@@ -138,6 +138,7 @@ const COMMANDS: Commands = {
 };
 
 
+
 const ChatWindow: FC<ChatWindowProps> = ({
   project_id,
   isDocument,
@@ -150,6 +151,9 @@ const ChatWindow: FC<ChatWindowProps> = ({
   const { toast } = useToast();
   const [input, setInput] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
+  const [waitForGetChunksApi, setWaitForGetChunksApi] = useState<boolean>(true)
+  const [waitForChatHistory, setWaitForChatHistory] = useState<boolean>(true)
+  const [isRender, setIsRender] = useState<boolean>(false)
   const socket = useRef<WebSocket | null>(null);
   const chatWindowRef = useRef<HTMLDivElement | null>(null);
   const [selectedText, setSelectedText] = useState<string | null>(null);
@@ -176,6 +180,8 @@ const ChatWindow: FC<ChatWindowProps> = ({
   const messageRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   const [isMessage, setIsMessage] = useState<boolean>(false)
 
+  const isDocumentViewerOpen = useSelector((state: RootState) => state.ui.isDocumentViewerOpen);
+  const [chunks, setChunks] = useState<Chunk[]>([])
   const toggleMessage = () => setIsMessage(!isMessage)
 
   const scrollToMessage = (msgId: string) => {
@@ -195,6 +201,7 @@ const ChatWindow: FC<ChatWindowProps> = ({
       }
     }
   },[content, option])
+  
   const handleClearQuoted = () => {
     setContentChat('')
     setOptionChat('')
@@ -208,13 +215,43 @@ const ChatWindow: FC<ChatWindowProps> = ({
     setShowPopup(true)
     setContextMenu(null);
   }
-
+  
   const handleOpenDocument = (document: Document) => {
     setSelectedDocument(document);
     setIsOpenDocument(true);
   };
   const handleCloseDocument = () => setIsOpenDocument(false);
   const handleToggleSource = () => setIsOpenSource(!isOpenSource);
+  
+  const handleGetChunkDocument = async (documentId: string) => {
+    try {
+      const data = await getChunkDocument(documentId)
+      dispatch(setChunksForDocument({ document_id: documentId, chunks: data.data }));
+    } catch (e) {
+      console.log(e)
+    }
+  }
+
+  const getChunks = async (documents: Document[]) => {
+    await Promise.all(
+      documents.map(async (document) => {
+        const existingChunks = chunksState[document.document_id];
+        if (!existingChunks) {
+          await handleGetChunkDocument(document.document_id);
+        }
+      })
+    );
+    setWaitForGetChunksApi(false)
+  };
+
+const chunksState = useSelector((state: RootState) => state.chunks);
+
+  useEffect(() => {
+    console.log(chunksState && conversationExists && !waitForGetChunksApi && !waitForChatHistory)
+    if (chunksState && conversationExists && !waitForGetChunksApi && !waitForChatHistory) {
+      setIsRender(true)
+    }
+  }, [chunksState, conversationExists, waitForGetChunksApi, waitForChatHistory])
 
   const dispatch = useDispatch();
   const conversation = useSelector(
@@ -228,13 +265,13 @@ const ChatWindow: FC<ChatWindowProps> = ({
   const handleGetDocumentByConversation = async () => {
     try {
       const data = await getDocumentsByConversation(conversation_id);
-      console.log(data)
       setDocuments(data.data);
+      await getChunks(data.data);
     } catch (e) {
       console.log(e);
     }
   };
-  const handleCreateNewNote = async (content: string) => {
+  const handleCreateNewNote = useCallback(async (content: string) => {
     setContextMenu(null);
     toast({
       description: "Loading...",
@@ -284,54 +321,23 @@ const ChatWindow: FC<ChatWindowProps> = ({
       });
       console.log(e);
     }
-  };
+  }, [])
   
   const handleGetChatHistory = async () => {
-    console.log(conversation_id)
     try {
       const data = await getChatHistory(conversation_id as string)
       dispatch(addChatHistory({ conversation_id, messages: data.data }));
+      setWaitForChatHistory(false)
     } catch (e) {
       console.log(e)
     }
-  }
-
-  function findDocumentNameById(document_id: string): string | undefined {
-    const document = documents.find((doc) => doc.document_id === document_id);
-
-    return document ? document.document_name : undefined;
-  }
-  function convertISOToDate(isoString: string) {
-    const date = new Date(isoString);
-
-    const day = date.getDate(); // Ngày
-    const year = date.getFullYear(); // Năm
-
-    const monthNames = [
-      "January",
-      "February",
-      "March",
-      "April",
-      "May",
-      "June",
-      "July",
-      "August",
-      "September",
-      "October",
-      "November",
-      "December",
-    ];
-
-    const month = monthNames[date.getMonth()]; // Tháng (0 - 11)
-
-    return `${day} ${month} ${year}`;
   }
 
   useEffect(() => {
     setDocuments([])
     if (conversation_id === undefined) return;
   
-    if (!conversationExists && !isDocument) {
+    if (!conversationExists) {
       handleGetDocumentByConversation();
     }
   
@@ -352,6 +358,8 @@ const ChatWindow: FC<ChatWindowProps> = ({
 
     return wsUrl;
   };
+
+  
 
   useEffect(() => {
     if (conversation_id !== undefined) {
@@ -551,7 +559,7 @@ const ChatWindow: FC<ChatWindowProps> = ({
     }
   };
 
-  const handleRightClick = (e: MouseEvent<HTMLDivElement>, msg: Message) => {
+  const handleRightClick = useCallback((e: MouseEvent<HTMLDivElement>, msg: Message) => {
     e.preventDefault();
     setSelectedMessage(msg.content);
     const selected = window.getSelection()?.toString();
@@ -561,14 +569,14 @@ const ChatWindow: FC<ChatWindowProps> = ({
       setContextMenu({ x: e.pageX, y: e.pageY });
       setDropdownPosition({ x: e.pageX, y: e.pageY })
     }
-  };
+  }, [])
 
-  const handleCopy = (text: string) => {
+  const handleCopy = useCallback((text: string) => {
     if (text) {
       navigator.clipboard.writeText(text);
       setContextMenu(null);
     }
-  };
+  }, [])
 
   const handleOptionClick = (option: string) => {
     window.getSelection()?.removeAllRanges();
@@ -627,8 +635,6 @@ const ChatWindow: FC<ChatWindowProps> = ({
         </div>
       );
     }
-  
-    // Regular message
     return <p className="text-sm">{content}</p>;
   };
 
@@ -650,9 +656,9 @@ const ChatWindow: FC<ChatWindowProps> = ({
     if (command === 'gather-info') {
       dispatch(addUserMessage({ conversation_id, content: `Thu thập thông tin ` + result }));
       dispatch(addServerMessage({ conversation_id, content: "" }));
-      handleQuickiesGatherInfo(documentIds, result);
+      handleQuickiesGatherInfo(isDocument ? [documentId] : documentIds, result);
     } else if (command === 'compare') {
-      handleQuickiesCompare(documentIds, result);
+      handleQuickiesCompare(isDocument ? [documentId] : documentIds, result);
     } else if (command === 'search-web') {
       dispatch(addUserMessage({ conversation_id, content: `Tìm kiếm ` + result }));
       dispatch(addServerMessage({ conversation_id, content: "" }));
@@ -660,12 +666,13 @@ const ChatWindow: FC<ChatWindowProps> = ({
     } else if (command === 'define') {
       dispatch(addUserMessage({ conversation_id, content: `Định nghĩa ` + result }));
       dispatch(addServerMessage({ conversation_id, content: "" }));
-      handleQuickiesDefine(documentIds, result);
+      handleQuickiesDefine(isDocument ? [documentId] : documentIds, result);
     } else if (command === 'search-wiki') {
       dispatch(addUserMessage({ conversation_id, content: `Tìm kiếm trên wikipedia ` + result }));
       dispatch(addServerMessage({ conversation_id, content: "" }));
       handleQuickiesSearchWiki(result);
-    } else if (command === 'summarize') {
+    }
+    else if (command === 'summarize') {
       dispatch(addUserMessage({ conversation_id, content: `Tóm tắt tài liệu` }));
       dispatch(addServerMessage({ conversation_id, content: "" }));
       handleSummarize()
@@ -801,11 +808,28 @@ const ChatWindow: FC<ChatWindowProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Submitted:', input);
+    const commands = Object.keys(COMMANDS);
+    const filteredCommands = commands.filter(command =>
+      command.startsWith(input) 
+    );
+    if (selectedIndex !== -1) {
+      const selectedCommand = filteredCommands[selectedIndex];
+      setInput(`${selectedCommand} `);
+      setActiveCommand(selectedCommand);
+      setShowSuggestions(false);
+      setShowHint(true);
+      textareaRef.current?.focus();
+    } else {
+      if (input.startsWith('/')) {
+        handleGetQuickies()
+      } else {
+        sendMessage(input as string, e as unknown as FormEvent<HTMLFormElement>);
+      }
+    }
   };
 
   return (
-    <div className="flex">
+    <div className="flex w-full transition-all">
       <div
         className={`flex flex-col relative justify-between overflow-auto bg-zinc-100 dark:bg-zinc-800 w-full`}
         style={{
@@ -813,225 +837,195 @@ const ChatWindow: FC<ChatWindowProps> = ({
         }}
       >
         <div
-          className={`flex flex-col ${isDocument ? "w-full px-7" : "w-10/12 pr-16 pl-10 pt-14 "} max-w-4xl  mx-auto flex-grow`}
+          className={`flex flex-col ${isDocument ? "w-full px-7" : " pr-16 pl-10 pt-14 "} max-w-4xl  mx-auto flex-grow`}
         >
           {/* Chat window */}
-          <div
-            ref={chatWindowRef}
-            className="w-full flex-1 relative overflow-auto"
-          >
-            {conversation.messages.map((msg, index) => (
+          {
+            isRender ? (
               <div
-                key={msg.id}
-                className={` group flex  ${msg.sender === "User" ? "dark:bg-neutral-700 bg-neutral-50 w-fit ml-auto max-w-md" : "flex"} 
-              mb-2 p-2 rounded-3xl mt-5 px-4 `}
-                id={`message-${msg.id}`}
-                ref={(el) => { messageRefs.current[msg.id] = el }}
-                onContextMenu={(e) => handleRightClick(e, msg)}
+                ref={chatWindowRef}
+                className="w-full flex-1 relative overflow-auto"
               >
-                {/* Avatar bot if Server */}
-                {msg.sender === "Server" && msg.content === "" && msg.status === "streaming" &&(
-                  <div className="animate-pulse mr-2 flex items-center flex-shrink-0 self-start ">
-                    <Lottie
-                      animationData={BotLoading}
-                      className="dark:invert"
-                      loop={true}
-                    />
-                    <span className=" text-xs">Viet is thinking ...</span>
-                  </div>
-                )}
-                {msg.sender === "Server" && msg.content !== "" && (
-                  <div className="mr-2 flex items-center flex-shrink-0 self-start ">
-                    <Image
-                      alt="Logo"
-                      src="/favicon.ico"
-                      width={18}
-                      height={18}
-                      className="mr-2 invert dark:invert-0"
-                    />
-                  </div>
-                )}
-
-                <div
-                  className={`flex flex-col  ${msg.sender === "Server" ? "ml-2 w-[96%]" : ""}`}
-                >
-                  {msg.sender === "Server" && msg.status === "streaming" ? (
-                    <TypingMessage message={msg.content} />
-                  ) : msg.sender === "Server" ? (
-                    <MarkdownRenderer content={msg.content} />
-                  ) : (
-                    <div>{renderMessage(msg.content as string)}</div>
-                  )}
-
-                  {Array.isArray(msg.chunk_ids) &&
-                    msg.chunk_ids.length > 0 &&
-                    msg.sender === "Server" && (
-                      <div key={msg.id} className="flex flex-wrap mt-2 items-center">
-                        <i className="text-sm">Learn more:</i>
-                        {msg.chunk_ids.map((chunkId, index) => {
-                          // Thêm index vào tham số
-                          const documentName = findDocumentNameById(chunkId.document_id);
-
-                          // Tạo key duy nhất bằng cách kết hợp chunkId.chunk_id và index
-                          const uniqueKey = `${chunkId.chunk_id}-${index}`;
-
-                          return (
-                            <HoverCard key={uniqueKey}>
-                              <HoverCardTrigger asChild>
-                                <Button
-                                  isIconOnly
-                                  className="ml-3 p-1"
-                                  size="sm"
-                                  variant="shadow"
-                                >
-                                  {index + 1} 
-                                </Button>
-                              </HoverCardTrigger>
-                              <HoverCardContent className="w-80 dark:bg-zinc-900 bg-zinc-50">
-                                <div className="flex justify-between space-x-4">
-                                  <div className="space-y-1">
-                                    <h4 className="text-sm font-semibold">
-                                      {documentName}
-                                    </h4>
-                                    <p className="text-sm">{chunkId.content}</p>
-                                    <div className="flex items-center pt-2">
-                                      <span className="text-xs text-muted-foreground">
-                                        {convertISOToDate(chunkId.created_at)}
-                                      </span>
-                                    </div>
-                                  </div>
-                                </div>
-                              </HoverCardContent>
-                            </HoverCard>
-                          );
-                        })}
+                {conversation.messages.map((msg, index) => (
+                  <div
+                    key={msg.id}
+                    className={` group flex  ${msg.sender === "User" ? "dark:bg-neutral-700 bg-neutral-50 w-fit ml-auto max-w-md" : "flex"} 
+                  mb-2 p-2 rounded-3xl mt-5 px-4 `}
+                    id={`message-${msg.id}`}
+                    ref={(el) => { messageRefs.current[msg.id] = el }}
+                    onContextMenu={(e) => handleRightClick(e, msg)}
+                  >
+                    {/* Avatar bot if Server */}
+                    {msg.sender === "Server" && msg.content === "" && msg.status === "streaming" &&(
+                      <div className="animate-pulse mr-2 flex items-center flex-shrink-0 self-start ">
+                        <Lottie
+                          animationData={BotLoading}
+                          className="dark:invert"
+                          loop={true}
+                        />
+                        <span className=" text-xs">Viet is thinking ...</span>
+                      </div>
+                    )}
+                    {msg.sender === "Server" && msg.content !== "" && (
+                      <div className="mr-2 flex items-center flex-shrink-0 self-start ">
+                        <Image
+                          alt="Logo"
+                          src="/favicon.ico"
+                          width={18}
+                          height={18}
+                          className="mr-2 invert dark:invert-0"
+                        />
                       </div>
                     )}
 
-
-                  {/* Display icons on hover */}
-                  {msg.sender === "Server" && msg.content !== "" && (
                     <div
-                      className="space-x-2 p-2"
-                      style={{ bottom: "-24px", left: "56px" }}
+                      className={`flex flex-col  ${msg.sender === "Server" ? "ml-2 w-[96%]" : ""}`}
                     >
-                      <Tooltip content="Like this message">
-                        <Button
-                          isIconOnly
-                          radius="full"
-                          size="sm"
-                          variant="light"
-                        >
-                          <HeartIcon className="w-5 h-5 " />
-                        </Button>
-                      </Tooltip>
-                      <Tooltip content="Feedback for bad message">
-                        <Button
-                          isIconOnly
-                          radius="full"
-                          size="sm"
-                          variant="light"
-                        >
-                          <HandThumbDownIcon className="w-5 h-5 " />
-                        </Button>
-                      </Tooltip>
-                      <Tooltip content="Copy">
-                        <Button
-                          isIconOnly
-                          radius="full"
-                          size="sm"
-                          variant="light"
-                          onClick={() => handleCopy(msg.content)}
-                        >
-                          <ClipboardIcon className="w-5 h-5" />
-                        </Button>
-                      </Tooltip>
-                      <Tooltip content="Pin to your note">
-                        <Button
-                          isIconOnly
-                          radius="full"
-                          size="sm"
-                          variant="light"
-                          onClick={() => handleCreateNewNote(msg.content)}
-                        >
-                          <PencilSquareIcon className="w-5 h-5 " />
-                        </Button>
-                      </Tooltip>
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
+                      {msg.sender === "Server" && msg.status === "streaming" ? (
+                        <TypingMessage 
+                        isDocument={isDocument} 
+                        message={msg.content} 
+                        documents={documents} 
+                        chunksState={chunksState}/>
+                      ) : msg.sender === "Server" ? (
+                        <MarkdownRenderer 
+                        isDocument={isDocument} 
+                        content={msg.content} 
+                        documents={documents} 
+                        chunksState={chunksState}/>
+                      ) : (
+                        <div>{renderMessage(msg.content as string)}</div>
+                      )}
 
-            {/* Context menu on right click */}
-            {contextMenu && (
-              <div
-                className="z-50 fixed dark:bg-zinc-800 bg-zinc-200 rounded-md shadow-lg"
-                style={{ top: contextMenu.y, left: contextMenu.x }}
-              >
-                <ListboxWrapper>
-                  <Listbox
-                  className="p-0"
-                    aria-label="Actions"
-                    onAction={(key) => handleOptionClick(key as string)}
+
+                      {msg.sender === "Server" && msg.content !== "" && (
+                        <div
+                          className="space-x-2 p-2"
+                          style={{ bottom: "-24px", left: "56px" }}
+                        >
+                          <Tooltip content="Like this message">
+                            <Button
+                              isIconOnly
+                              radius="full"
+                              size="sm"
+                              variant="light"
+                            >
+                              <HeartIcon className="w-5 h-5 " />
+                            </Button>
+                          </Tooltip>
+                          <Tooltip content="Feedback for bad message">
+                            <Button
+                              isIconOnly
+                              radius="full"
+                              size="sm"
+                              variant="light"
+                            >
+                              <HandThumbDownIcon className="w-5 h-5 " />
+                            </Button>
+                          </Tooltip>
+                          <Tooltip content="Copy">
+                            <Button
+                              isIconOnly
+                              radius="full"
+                              size="sm"
+                              variant="light"
+                              onClick={() => handleCopy(msg.content)}
+                            >
+                              <ClipboardIcon className="w-5 h-5" />
+                            </Button>
+                          </Tooltip>
+                          <Tooltip content="Pin to your note">
+                            <Button
+                              isIconOnly
+                              radius="full"
+                              size="sm"
+                              variant="light"
+                              onClick={() => handleCreateNewNote(msg.content)}
+                            >
+                              <PencilSquareIcon className="w-5 h-5 " />
+                            </Button>
+                          </Tooltip>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+
+                {/* Context menu on right click */}
+                {contextMenu && (
+                  <div
+                    className="z-50 fixed dark:bg-zinc-800 bg-zinc-200 rounded-md shadow-lg"
+                    style={{ top: contextMenu.y, left: contextMenu.x }}
                   >
-                    <ListboxItem key="copy" textValue="copy">
-                      <div
-                        className="flex items-center"
-                        onClick={() => handleCopy(selectedText as string)}
+                    <ListboxWrapper>
+                      <Listbox
+                      className="p-0"
+                        aria-label="Actions"
+                        onAction={(key) => handleOptionClick(key as string)}
                       >
-                        <Square2StackIcon className="pr-1 w-5 h-5" />
-                        Sao chép
-                      </div>
-                    </ListboxItem>
-                    <ListboxItem
-                      key="explain"
-                      textValue="explain"
-                      onClick={() => handleExplainWord(selectedText as string)}
-                    >
-                      <div className="flex items-center">
-                        <QuestionMarkCircleIcon className="pr-1 w-5 h-5" />
-                        Giải thích
-                      </div>
-                    </ListboxItem>
-                    <ListboxItem key="addNote" textValue="addNote">
-                      <div
-                        className="flex items-center"
-                        onClick={() =>
-                          handleCreateNewNote(selectedText as string)
-                        }
-                      >
-                        <ClipboardDocumentCheckIcon className="pr-1 w-5 h-5" />
-                        Thêm vào note
-                      </div>
-                    </ListboxItem>
-                    <ListboxItem key="quote" textValue="quote">
-                      <div
-                        className="flex items-center"
-                        onClick={() =>
-                          handleQuoted(selectedText as string)
-                        }
-                      >
-                        <PaperClipIcon className="pr-1 w-5 h-5" />
-                        Quote
-                      </div>
-                    </ListboxItem>
-                    <ListboxItem key="translate" textValue="translate">
-                      <div
-                        className="flex items-center"
-                        onClick={() =>
-                          handleTranslate(selectedText as string)
-                        }
-                      >
-                        <LanguageIcon className="pr-1 w-5 h-5" />
-                        Translate
-                      </div>
-                    </ListboxItem>
-                  </Listbox>
-                </ListboxWrapper>
+                        <ListboxItem key="copy" textValue="copy">
+                          <div
+                            className="flex items-center"
+                            onClick={() => handleCopy(selectedText as string)}
+                          >
+                            <Square2StackIcon className="pr-1 w-5 h-5" />
+                            Sao chép
+                          </div>
+                        </ListboxItem>
+                        <ListboxItem
+                          key="explain"
+                          textValue="explain"
+                          onClick={() => handleExplainWord(selectedText as string)}
+                        >
+                          <div className="flex items-center">
+                            <QuestionMarkCircleIcon className="pr-1 w-5 h-5" />
+                            Giải thích
+                          </div>
+                        </ListboxItem>
+                        <ListboxItem key="addNote" textValue="addNote">
+                          <div
+                            className="flex items-center"
+                            onClick={() =>
+                              handleCreateNewNote(selectedText as string)
+                            }
+                          >
+                            <ClipboardDocumentCheckIcon className="pr-1 w-5 h-5" />
+                            Thêm vào note
+                          </div>
+                        </ListboxItem>
+                        <ListboxItem key="quote" textValue="quote">
+                          <div
+                            className="flex items-center"
+                            onClick={() =>
+                              handleQuoted(selectedText as string)
+                            }
+                          >
+                            <PaperClipIcon className="pr-1 w-5 h-5" />
+                            Quote
+                          </div>
+                        </ListboxItem>
+                        <ListboxItem key="translate" textValue="translate">
+                          <div
+                            className="flex items-center"
+                            onClick={() =>
+                              handleTranslate(selectedText as string)
+                            }
+                          >
+                            <LanguageIcon className="pr-1 w-5 h-5" />
+                            Translate
+                          </div>
+                        </ListboxItem>
+                      </Listbox>
+                    </ListboxWrapper>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
+            ) : (
+              <div className="h-full w-full flex items-center justify-center">
+                <Spinner color="default" label="Loading..." />
+              </div>
+            )
+          }
 
           <div className="pl-6 w-full bg-zinc-100 dark:bg-zinc-800 flex justify-center items-center flex-col mt-4 sticky bottom-0">
                 {optionChat === 'quote' && contentChat && (
@@ -1113,7 +1107,7 @@ const ChatWindow: FC<ChatWindowProps> = ({
 
             {/* Form */}
             <form
-              className="flex w-full items-center space-x-2"
+              className="flex transition-all w-full items-center space-x-2"
               onSubmit={handleSubmit}
             >
               <Textarea
@@ -1126,7 +1120,7 @@ const ChatWindow: FC<ChatWindowProps> = ({
                 maxRows={3}
                 variant="faded"
                 classNames={{
-                  input: "resize-none",
+                  input: "resize-none transition-all",
                   inputWrapper: "rounded-full"
                 }}
               />
@@ -1148,7 +1142,7 @@ const ChatWindow: FC<ChatWindowProps> = ({
           </div>
         </div>
 
-        {!isDocument && (
+        {!isDocument && !isDocumentViewerOpen && (
           <div className="fixed bottom-9 right-9 z-5">
             <Tooltip content="Document Pool!">
               <Button

@@ -55,8 +55,10 @@ const DocumentViewer: React.FC<DocumentProps> = ({
   };
 
   useEffect(() => {
-    handleGetChunkDocument();
-    handleGetUrlDocument()
+    if(document && document?.document_id) {
+      handleGetChunkDocument();
+      handleGetUrlDocument()
+    }
   }, [document?.document_id]);
 
   return (
