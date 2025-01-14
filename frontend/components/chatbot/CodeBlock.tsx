@@ -2,12 +2,21 @@ import React, { useCallback, useMemo } from "react";
 import ReactMarkdown from "react-markdown";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
-import { Card, CardHeader, CardBody, Link, Button, Tooltip, CardFooter } from "@nextui-org/react";
+import { Card, 
+  CardHeader, 
+  CardBody, 
+  Link, 
+  Button, 
+  Tooltip, 
+  CardFooter, 
+  Popover, 
+  PopoverTrigger, 
+  PopoverContent 
+} from "@nextui-org/react";
 import { useDispatch, useSelector } from 'react-redux';
 import { setOutlineContent } from "@/src/store/outlineSlice";
 import { RootState } from "@/src/store/store";
 import { Document, ChunksState } from "@/src/types/types";
-import {Popover, PopoverTrigger, PopoverContent} from "@nextui-org/popover"
 import { FileIcon } from "lucide-react";
 import { ChevronDoubleRightIcon, ArrowUpOnSquareIcon } from "@heroicons/react/24/outline";
 import {Table, TableHeader, TableColumn, TableBody, TableRow, TableCell} from "@nextui-org/react";
