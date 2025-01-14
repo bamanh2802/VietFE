@@ -130,6 +130,9 @@ const MarkdownRenderer = React.memo(({ content, documents, chunksState, isDocume
     );
   });
 
+
+  Citation.displayName = "Citation";
+
   const transformCite = useCallback((input: string) => {
     const citeRegex = /<cite>(.*?)<\/cite>/g;
     const parseCitation = (citeContent: string) => {
@@ -179,9 +182,11 @@ const MarkdownRenderer = React.memo(({ content, documents, chunksState, isDocume
 
     return elements;
   }, [chunksState, findDocumentNameById]);
+  
+
 
   const MarkdownComponent = useMemo(() => {
-    return ({ text }: { text: string }) => (
+    const Component = ({ text }: { text: string }) => (
       <ReactMarkdown
         components={{
           p: ({ node, ...props }) => <span {...props} />,
@@ -212,7 +217,13 @@ const MarkdownRenderer = React.memo(({ content, documents, chunksState, isDocume
         {text}
       </ReactMarkdown>
     );
+  
+    Component.displayName = "MarkdownComponent"; 
+  
+    return Component;
   }, []);
+  
+  
 
   const extractContentWithOrder = (markdown: string) => {
     const parts: { type: 'text' | 'table'; content: string }[] = [];
@@ -325,8 +336,9 @@ const MarkdownRenderer = React.memo(({ content, documents, chunksState, isDocume
       </div>
     );
   }
+  
 
-  const processedCites = useMemo(() => transformCite(processedContent), [processedContent, transformCite]);
+  const processedCites = transformCite(processedContent)
 
   return (
     <div className="relative w-full">
