@@ -16,7 +16,7 @@ const TypingMessage = React.memo(({ message, documents, chunksState, isDocument 
     if (displayedText.length < message.length) {
       const timeout = setTimeout(() => {
         setDisplayedText(message.slice(0, displayedText.length + 1));
-      }, 5);
+      }, 1);
 
       return () => clearTimeout(timeout);
     }

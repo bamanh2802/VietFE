@@ -247,7 +247,6 @@ const ChatWindow: FC<ChatWindowProps> = ({
 const chunksState = useSelector((state: RootState) => state.chunks);
 
   useEffect(() => {
-    console.log(chunksState && conversationExists && !waitForGetChunksApi && !waitForChatHistory)
     if (chunksState && conversationExists && !waitForGetChunksApi && !waitForChatHistory) {
       setIsRender(true)
     }
@@ -765,7 +764,6 @@ const chunksState = useSelector((state: RootState) => state.chunks);
     try {
       const data = await shallowOutlineDocument(documentId as string);
       dispatch(updateServerMessage({ conversation_id, content: data.data }));
-      console.log(data.data)
     } catch (e) {
       console.error("Error fetching outline data:", e);
     } finally {

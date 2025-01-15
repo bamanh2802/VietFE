@@ -22,7 +22,7 @@ import { ChevronDoubleRightIcon, ArrowUpOnSquareIcon } from "@heroicons/react/24
 import {Table, TableHeader, TableColumn, TableBody, TableRow, TableCell} from "@nextui-org/react";
 import { openDocumentViewer, closeDocumentViewer } from "@/src/store/uiSlice";
 import { setDocument } from "@/src/store/documentViewSlice";
-
+import MarkdownIt from 'markdown-it';
 
 const MarkdownRenderer = React.memo(({ content, documents, chunksState, isDocument }: {
   content: string;
@@ -30,6 +30,7 @@ const MarkdownRenderer = React.memo(({ content, documents, chunksState, isDocume
   chunksState: ChunksState;
   isDocument: boolean
 }) => {
+  const md = new MarkdownIt();
   const dispatch = useDispatch();
   const isDocumentViewerOpen = useSelector((state: RootState) => state.ui.isDocumentViewerOpen)
   const toggleFileViewer = (documentId: string) => {
@@ -144,6 +145,7 @@ const MarkdownRenderer = React.memo(({ content, documents, chunksState, isDocume
 
   const transformCite = useCallback((input: string) => {
     const citeRegex = /<cite>(.*?)<\/cite>/g;
+  
     const parseCitation = (citeContent: string) => {
       const chunkMatch = citeContent.match(/<c>(chunk-[^<]+)<\/c>/);
       const fileMatch = citeContent.match(/<f>(doc-[^<]+)<\/f>/);
@@ -152,44 +154,58 @@ const MarkdownRenderer = React.memo(({ content, documents, chunksState, isDocume
         fileId: fileMatch ? fileMatch[1] : undefined,
       };
     };
-
+  
     const elements: React.ReactNode[] = [];
     let lastIndex = 0;
     let match;
     let index = 0;
-
+  
     while ((match = citeRegex.exec(input)) !== null) {
       const beforeText = input.slice(lastIndex, match.index);
-      const citation = parseCitation(match[1]);
-      
+  
       if (beforeText) {
-        elements.push(beforeText);
+        elements.push(
+          <div key={`text-${index}`} className="inline">
+            <MarkdownComponent text={beforeText} />
+          </div>
+        );
       }
-
+  
+      const citation = parseCitation(match[1]);
       if (citation.fileId) {
         const chunkData = chunksState[citation.fileId];
         const chunk = chunkData?.find(chunk => chunk.chunk_id === citation.chunkId);
         const documentName = findDocumentNameById(citation.fileId);
-
+  
         elements.push(
-          <Citation 
-            key={`cite-${index}`}
-            citation={citation}
-            index={index}
-            documentName={documentName}
-            chunk={chunk}
-          />
+          <span key={`cite-${index}`} className="mx-1">
+            <Citation
+              citation={citation}
+              index={index}
+              documentName={documentName}
+              chunk={chunk}
+            />
+          </span>
         );
         index += 1;
       }
       lastIndex = citeRegex.lastIndex;
     }
-
+  
     if (lastIndex < input.length) {
-      elements.push(input.slice(lastIndex));
+      const remainingText = input.slice(lastIndex);
+      elements.push(
+        <div key={`text-${index}`} className="">
+          <MarkdownComponent text={remainingText} />
+        </div>
+      );
     }
-
-    return elements;
+  
+    return (
+      <span className="markdown-content">
+        {elements}
+      </span>
+    );
   }, [chunksState, findDocumentNameById]);
   
 
