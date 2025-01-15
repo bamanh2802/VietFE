@@ -7,7 +7,7 @@ export async function uploadDocument(projectId: string, selectedFiles: File[]) {
 
   const formData = new FormData();
 
-  selectedFiles.forEach((file: File) => formData.append("file", file));
+  selectedFiles.forEach((file: File) => formData.append("files", file));
   formData.append("project_id", projectId);
 
   const response = await axios.post(
@@ -19,11 +19,12 @@ export async function uploadDocument(projectId: string, selectedFiles: File[]) {
         "Content-Type": "multipart/form-data",
         Authorization: `Bearer ${accessToken}`,
       },
-    },
+    }
   );
 
   return response;
 }
+
 
 export async function getDocumentsByConversation(conversation_id: string) {
   const accessToken = localStorage.getItem("access_token");

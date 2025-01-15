@@ -837,7 +837,7 @@ const chunksState = useSelector((state: RootState) => state.chunks);
         }}
       >
         <div
-          className={`flex flex-col ${isDocument ? "w-full px-7" : " pr-16 pl-10 pt-14 "} max-w-4xl  mx-auto flex-grow`}
+          className={`flex flex-col ${isDocument ? "w-full px-7" : "w-full pr-16 pl-10 pt-14 "} max-w-4xl  mx-auto flex-grow`}
         >
           {/* Chat window */}
           {

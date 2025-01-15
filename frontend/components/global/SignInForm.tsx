@@ -44,6 +44,7 @@ const SignInForm: React.FC<SignInFormProps> = ({ isOpen, closeForm}) => {
 
       if(data !== undefined) {
         localStorage.setItem("access_token", data?.data.access_token);
+        localStorage.setItem("user_id", data?.data.user_id)
         setIsLoadingSignIn(false);
         router.push("/home");
       }
@@ -98,7 +99,6 @@ const SignInForm: React.FC<SignInFormProps> = ({ isOpen, closeForm}) => {
 
     setErrors(newErrors);
 
-    // Return true nếu không có lỗi
     return Object.keys(newErrors).length === 0;
   };
 
@@ -112,7 +112,6 @@ const SignInForm: React.FC<SignInFormProps> = ({ isOpen, closeForm}) => {
       return
     };
 
-    // Gửi dữ liệu đăng ký tới server
     try {
       const data = await createUser(
         formData.username,
@@ -121,8 +120,6 @@ const SignInForm: React.FC<SignInFormProps> = ({ isOpen, closeForm}) => {
         formData.firstName,
         formData.lastName,
       );
-
-      console.log(data);
 
       handleToggleSuccess()
       setFormData({

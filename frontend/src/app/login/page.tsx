@@ -40,6 +40,7 @@ const SignInForm: React.FC<SignInFormProps> = ({}) => {
 
       if(data !== undefined) {
         localStorage.setItem("access_token", data?.data.access_token);
+        localStorage.setItem("user_id", data?.data.user_id)
         setIsLoadingSignIn(false);
         router.push("/home");
       }
