@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { Skeleton } from "@nextui-org/react"
+import { Skeleton } from "@nextui-org/skeleton"
 
 export function DocumentSkeleton() {
   return (

@@ -14,21 +14,15 @@ import {
   ExclamationCircleIcon,
 } from "@heroicons/react/24/outline";
 
-// NextUI imports
-import {
-  Tabs,
-  Tab,
-  Card,
-  Skeleton,
-  Input,
-  Button,
-  CardBody,
-  Divider,
-  Image,
-  Avatar,
-  Listbox,
-  ListboxItem,
-} from "@nextui-org/react";
+import { Tabs, Tab } from "@nextui-org/tabs";
+import { Card, CardBody } from "@nextui-org/card";
+import { Skeleton } from "@nextui-org/skeleton";
+import { Input } from "@nextui-org/input";
+import { Button } from "@nextui-org/button";
+import { Divider } from "@nextui-org/divider";
+import { Image } from "@nextui-org/image";
+import { Avatar } from "@nextui-org/avatar";
+import { Listbox, ListboxItem } from "@nextui-org/listbox";
 
 import {
   CardContent,
@@ -37,7 +31,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@nextui-org/react"
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@nextui-org/modal"
 
 import { deleteProjectById, renameProjectById } from "@/service/apis"; 
 

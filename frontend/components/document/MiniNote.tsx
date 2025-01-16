@@ -3,7 +3,7 @@ import { Rnd } from "react-rnd";
 import dynamic from "next/dynamic";
 import { Note } from "@/src/types/types";
 import { getNotesInProject } from "@/service/projectApi";
-import { Button } from "@nextui-org/react";
+import { Button } from "@nextui-org/button";
 import {
   Menubar,
   MenubarContent,
@@ -16,7 +16,7 @@ import { createNewNote, deleteNote, renameNote, editNote, getNoteById } from "@/
 import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 import { useToast } from "@/hooks/use-toast";
 import NoteList from "./NoteList";
-import { Skeleton } from '@nextui-org/react';
+import { Skeleton } from '@nextui-org/skeleton';
 interface MiniNoteProps {
   projectId: string
 }

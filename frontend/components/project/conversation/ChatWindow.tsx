@@ -10,15 +10,13 @@ import React, {
   MouseEvent,
   useCallback,
 } from "react";
-import {
-  Button,
-  Textarea,
-  Listbox,
-  ListboxItem,
-  Tooltip,
-  Image,
-  Skeleton
-} from "@nextui-org/react";
+
+import {Button} from "@nextui-org/button";
+import {Textarea} from "@nextui-org/input";
+import {  Listbox,  ListboxSection,  ListboxItem} from "@nextui-org/listbox";
+import {Tooltip} from "@nextui-org/tooltip";
+import {Image} from "@nextui-org/image";
+import {Skeleton} from "@nextui-org/skeleton";
 import { ArrowRightIcon } from "@heroicons/react/24/outline";
 import {
   ClipboardIcon,
@@ -37,7 +35,7 @@ import {
   ChevronRightIcon
 } from "@heroicons/react/24/outline";
 import { TranslationPopup } from "@/components/global/Translate";
-import { Card, CardBody, CardHeader } from "@nextui-org/react";
+import {Card, CardHeader, CardBody, CardFooter} from "@nextui-org/card";
 import {Spinner} from "@nextui-org/spinner";
 import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";

@@ -1,18 +1,15 @@
 import React from "react";
-import {
-  Card,
-  CardHeader,
-  CardBody,
-  Image,
-  CardFooter,
-  Divider,
-} from "@nextui-org/react";
+import {Divider} from "@nextui-org/divider";
+import {Image} from "@nextui-org/image";
+import {Card, CardHeader, CardBody, CardFooter} from "@nextui-org/card";
 import {
   DocumentTextIcon,
   ChatBubbleLeftRightIcon,
   PlusIcon,
 } from "@heroicons/react/24/outline";
-import { Skeleton, Avatar, Tooltip } from "@nextui-org/react";
+import {Tooltip} from "@nextui-org/tooltip";
+import {Skeleton} from "@nextui-org/skeleton";
+import {Avatar} from "@nextui-org/avatar";
 
 import {
   Carousel,

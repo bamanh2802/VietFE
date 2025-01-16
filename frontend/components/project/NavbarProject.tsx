@@ -2,14 +2,9 @@
 import { FC } from "react";
 import { useRouter } from "next/navigation";
 import React from "react";
-import {
-  Navbar,
-  NavbarBrand,
-  NavbarContent,
-  NavbarItem,
-  Breadcrumbs,
-  BreadcrumbItem,
-} from "@nextui-org/react";
+import {Breadcrumbs, BreadcrumbItem} from "@nextui-org/breadcrumbs";
+import {  Navbar,   NavbarBrand,   NavbarContent,   NavbarItem} from "@nextui-org/navbar";
+
 import { UsersIcon } from "lucide-react";
 import { HomeIcon } from "@heroicons/react/24/outline";
 import { useSelector } from "react-redux";

@@ -8,7 +8,10 @@ import {
 } from "@heroicons/react/24/outline";
 import {Spinner} from "@nextui-org/spinner";
 import { useRouter } from "next/navigation";
-import { Listbox, ListboxItem, Modal, ModalContent, ModalHeader, ModalBody, Input, Kbd } from "@nextui-org/react";
+import { Listbox, ListboxItem } from "@nextui-org/listbox";
+import {  Modal,  ModalContent,  ModalHeader,  ModalBody} from "@nextui-org/modal";
+import { Input } from "@nextui-org/input";
+import {Kbd} from "@nextui-org/kbd";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Document, Note, Conversation, Project, NoteSearch, DocumentSearch } from "@/src/types/types";
 import { searchKeywordConversation, searchKeywordDocument, searchKeywordNote } from "@/service/apis";

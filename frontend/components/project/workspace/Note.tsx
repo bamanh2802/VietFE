@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Skeleton } from "@nextui-org/react";
+import { Skeleton } from "@nextui-org/skeleton";
 import { UserIcon, 
   MagnifyingGlassIcon, 
   DocumentTextIcon, 

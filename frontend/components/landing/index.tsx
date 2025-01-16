@@ -2,8 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import {Tabs, Tab} from "@nextui-org/react";
 import { AlertCircle, Search, Settings, Sparkles } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { BookOpen, Brain, FileText, Image, Share2, Users, Moon, Sun } from 'lucide-react'

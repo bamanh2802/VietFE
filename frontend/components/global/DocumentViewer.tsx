@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Tabs, Tab } from "@nextui-org/react";
+import { Tabs, Tab } from "@nextui-org/tabs";
 import {
   Dialog,
   DialogContent,

@@ -1,6 +1,6 @@
 'use client'
 import * as React from 'react';
-import { Button } from '@nextui-org/react';
+import { Button } from '@nextui-org/button';
 import { useTypingEffect } from '@/src/hook/useTypingEffect';
 import { useTranslations } from 'next-intl';
 

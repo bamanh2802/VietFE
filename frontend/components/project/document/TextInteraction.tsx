@@ -1,6 +1,8 @@
 "use client"
 import { useState, useEffect, useRef } from "react";
-import { Listbox, ListboxItem, Spinner } from "@nextui-org/react";
+import {Spinner} from "@nextui-org/spinner";
+import { Button } from "@nextui-org/button";
+import { Listbox, ListboxItem } from "@nextui-org/listbox";
 import {
   Square2StackIcon,
   QuestionMarkCircleIcon,
@@ -9,9 +11,9 @@ import {
   PaperClipIcon,
   LanguageIcon
 } from "@heroicons/react/24/outline";
-import { Tabs, Tab } from "@nextui-org/react";
+import { Tabs, Tab } from "@nextui-org/tabs";
 import { useRouter } from "next/navigation";
-import { Textarea } from "@nextui-org/react";
+import { Textarea } from "@nextui-org/input";
 import "@cyntler/react-doc-viewer/dist/index.css";
 import 'pdfjs-dist/build/pdf.worker.entry';
 import { getChunkDocument, keywordSearchChunks, getDocumentById } from "@/service/documentApi";

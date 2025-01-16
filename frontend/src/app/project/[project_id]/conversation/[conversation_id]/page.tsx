@@ -2,13 +2,14 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation"; // Lấy project_id từ URL
-import { Breadcrumbs, BreadcrumbItem } from "@nextui-org/react";
+import {Breadcrumbs, BreadcrumbItem} from "@nextui-org/breadcrumbs";
+
 import { HomeIcon, UserGroupIcon, PlusIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { UsersIcon } from "lucide-react";
 import Image from "next/image";
 import PreLoader from "@/public/img/PreLoader.gif";
 import Head from 'next/head';
-import { Button } from "@nextui-org/react";
+import { Button } from "@nextui-org/button";
 import FileViewer from "@/components/global/PDFViewer";
 import { useSelector, useDispatch } from 'react-redux'
 import { RootState } from "@/src/store/store";

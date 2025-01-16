@@ -13,7 +13,8 @@ import {
 } from "@heroicons/react/24/outline";
 import dayjs from "dayjs"; // Thư viện để xử lý ngày tháng
 import { EllipsisHorizontalIcon } from "@heroicons/react/24/outline";
-import { Listbox, ListboxItem, Button } from "@nextui-org/react";
+import { Button } from "@nextui-org/button";
+import { Listbox, ListboxItem } from "@nextui-org/listbox";
 import MiniNote from "@/components/document/MiniNote";
 import {ChatBubbleLeftIcon} from "@heroicons/react/24/outline";
 

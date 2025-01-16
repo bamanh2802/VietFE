@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Button, Listbox, ListboxItem } from "@nextui-org/react";
+import { Button } from "@nextui-org/button";
+import { Listbox, ListboxItem } from "@nextui-org/listbox";
 import {
   EllipsisHorizontalIcon,
   PlusIcon,

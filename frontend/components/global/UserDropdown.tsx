@@ -1,17 +1,11 @@
 'use client'
 import React, { useEffect, useState } from "react";
-import {
-  Dropdown,
-  DropdownTrigger,
-  DropdownMenu,
-  DropdownItem,
-  Avatar,
-} from "@nextui-org/react";
+import {  Dropdown,  DropdownTrigger,  DropdownMenu,  DropdownSection,  DropdownItem} from "@nextui-org/dropdown";
 import { useRouter } from "next/navigation";
+import {  Modal,  ModalContent,  ModalHeader,  ModalBody,  ModalFooter} from "@nextui-org/modal";
 import { useDispatch, useSelector } from "react-redux";
-import { Modal, ModalContent, ModalHeader, ModalBody } from "@nextui-org/react";
 import dynamic from "next/dynamic";
-
+import {Avatar} from "@nextui-org/avatar";
 import { Logout, getUser } from "@/service/apis";
 import { RootState } from "@/src/store/store";
 import { setUser, clearUser } from "@/src/store/userSlice";

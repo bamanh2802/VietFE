@@ -3,19 +3,11 @@
 import React, { useState } from "react";
 import { useTranslations } from 'next-intl';
 import { useRouter } from "next/navigation";
-import {
-  Navbar,
-  NavbarBrand,
-  NavbarContent,
-  NavbarItem,
-  Input,
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-} from "@nextui-org/react";
-import { Button } from "@nextui-org/react";
+
+import {  Modal,  ModalContent,  ModalHeader,  ModalBody,  ModalFooter} from "@nextui-org/modal";
+import {Input} from "@nextui-org/input";
+import {  Navbar,   NavbarBrand,   NavbarContent,   NavbarItem} from "@nextui-org/navbar";
+import { Button } from "@nextui-org/button";
 
 
 import { PlusIcon, HomeIcon } from "@heroicons/react/24/outline";

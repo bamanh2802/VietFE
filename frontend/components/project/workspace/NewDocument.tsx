@@ -1,6 +1,12 @@
 import { FC, useState, useEffect, useRef, useMemo } from "react";
 import { FileText, Link, Upload, X, Loader2, CheckCircle, Globe, Link2 } from 'lucide-react'
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input, Progress, Tabs, Tab, Card, CardBody, Chip } from "@nextui-org/react";
+import {  Modal,  ModalContent,  ModalHeader,  ModalBody,  ModalFooter} from "@nextui-org/modal";
+import { Button } from "@nextui-org/button";
+import { Input } from "@nextui-org/input";
+import {Progress} from "@nextui-org/progress";
+import {Tabs, Tab} from "@nextui-org/tabs";
+import {Card, CardBody} from "@nextui-org/card";
+import {Chip} from "@nextui-org/chip";
 import { Document } from "@/src/types/types";
 import { uploadDocument, uploadUrlDocument } from "@/service/documentApi";
 import checkmarkLoader from "@/public/svg/checkmarkLoader.json"

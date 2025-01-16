@@ -1,7 +1,10 @@
 'use client'
 import { CopyIcon } from "@radix-ui/react-icons";
 import { FC, useEffect, useState } from "react";
-import { Button, Input, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Spinner } from "@nextui-org/react";
+import { Button } from "@nextui-org/button";
+import { Input } from "@nextui-org/input";
+import {Spinner} from "@nextui-org/spinner";
+import {  Modal,  ModalContent,  ModalHeader,  ModalBody,  ModalFooter} from "@nextui-org/modal";
 import { getSharedNoteId } from "@/service/noteApi";
 import { useSelector } from "react-redux";
 import { RootState } from "@/src/store/store";

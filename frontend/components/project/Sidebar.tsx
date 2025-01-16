@@ -18,8 +18,9 @@ import {
   ChatBubbleLeftIcon,
   WindowIcon,
 } from "@heroicons/react/24/outline";
-
-import { Listbox, ListboxItem, Button, Tooltip } from "@nextui-org/react";
+import { Listbox, ListboxItem } from "@nextui-org/listbox";
+import { Button } from "@nextui-org/button";
+import {Tooltip} from "@nextui-org/tooltip";
 import { useSelector, useDispatch } from "react-redux";
 
 import {

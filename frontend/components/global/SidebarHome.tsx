@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from 'next-intl';
 
-import { Button, Skeleton } from "@nextui-org/react";
-
+import {Skeleton} from "@nextui-org/skeleton";
+import {Button} from "@nextui-org/button";
 
 import {
   UserGroupIcon,

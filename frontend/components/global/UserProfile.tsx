@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Edit2, Menu, Upload } from "lucide-react";
-import { Tooltip } from "@nextui-org/react";
+import { Tooltip } from "@nextui-org/tooltip";
 import { useTheme } from "next-themes";
 import {
   UserCircleIcon,

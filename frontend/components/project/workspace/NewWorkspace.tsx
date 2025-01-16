@@ -3,17 +3,10 @@
 import React, { useState, useEffect, FC } from "react";
 import { useRouter } from "next/navigation";
 import { useDispatch } from "react-redux";
-import { 
-  Listbox, 
-  ListboxItem, 
-  Button, 
-  Modal, 
-  ModalContent, 
-  ModalHeader, 
-  ModalBody, 
-  ModalFooter,
-  Input
-} from "@nextui-org/react";
+import {  Modal,  ModalContent,  ModalHeader,  ModalBody,  ModalFooter} from "@nextui-org/modal";
+import { Listbox, ListboxItem } from "@nextui-org/listbox";
+import { Button } from "@nextui-org/button";
+import { Input } from "@nextui-org/input";
 import {
   PlusIcon,
   DocumentTextIcon,

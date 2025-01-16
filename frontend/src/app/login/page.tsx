@@ -3,7 +3,10 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { Checkbox } from "@/components/ui/checkbox";
-import {Modal, Input, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, useDisclosure} from "@nextui-org/react";
+import { Button } from "@nextui-org/button";
+import { Input } from "@nextui-org/input";
+import {  Modal,  ModalContent,  ModalHeader,  ModalBody,  ModalFooter} from "@nextui-org/modal";
+
 import { Label } from "@/components/ui/label";
 import { SignIn, createUser } from "@/service/apis";
 import { RiFacebookLine, RiGoogleLine, RiMicrosoftLine } from "@remixicon/react";

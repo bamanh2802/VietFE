@@ -1,5 +1,13 @@
 import React from "react";
-import {Navbar, NavbarBrand, NavbarContent, NavbarItem, Link, Button, Image, NavbarMenuToggle} from "@nextui-org/react";
+
+  import {Image} from "@nextui-org/image";
+  import {Button, ButtonGroup} from "@nextui-org/button";
+  import {Link} from "@nextui-org/link";
+  import {  
+    Navbar,   
+    NavbarBrand,   
+    NavbarContent,   
+    NavbarItem} from "@nextui-org/navbar";
 import { useTranslations } from 'next-intl';
 
 interface NavbarLandingProps {

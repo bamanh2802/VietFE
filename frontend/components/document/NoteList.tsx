@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Note } from "@/src/types/types";
 import { Pencil, Trash2, FileText } from 'lucide-react';
-import { Button } from "@nextui-org/react";
+import { Button } from "@nextui-org/button";
 import { Input } from "@/components/ui/input";
 import {
   AlertDialog,
@@ -14,7 +14,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Skeleton } from "@nextui-org/react";
+import { Skeleton } from "@nextui-org/skeleton";
 
 interface NoteListProps {
   notes?: Note[];

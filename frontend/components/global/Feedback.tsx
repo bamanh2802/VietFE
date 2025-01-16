@@ -1,15 +1,9 @@
 import React, { useState } from "react";
-import {
-  Button,
-  Textarea,
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  Select,
-  SelectItem,
-} from "@nextui-org/react";
+import { Button } from "@nextui-org/button";
+import { Textarea } from "@nextui-org/input";
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@nextui-org/modal";
+import { Select, SelectItem } from "@nextui-org/select";
+
 
 interface FeedbackProps {
   open: boolean;
