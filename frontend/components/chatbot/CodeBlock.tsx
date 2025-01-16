@@ -22,7 +22,6 @@ import { ChevronDoubleRightIcon, ArrowUpOnSquareIcon } from "@heroicons/react/24
 import {Table, TableHeader, TableColumn, TableBody, TableRow, TableCell} from "@nextui-org/react";
 import { openDocumentViewer, closeDocumentViewer } from "@/src/store/uiSlice";
 import { setDocument } from "@/src/store/documentViewSlice";
-import MarkdownIt from 'markdown-it';
 
 const MarkdownRenderer = React.memo(({ content, documents, chunksState, isDocument }: {
   content: string;
@@ -30,7 +29,6 @@ const MarkdownRenderer = React.memo(({ content, documents, chunksState, isDocume
   chunksState: ChunksState;
   isDocument: boolean
 }) => {
-  const md = new MarkdownIt();
   const dispatch = useDispatch();
   const isDocumentViewerOpen = useSelector((state: RootState) => state.ui.isDocumentViewerOpen)
   const toggleFileViewer = (documentId: string) => {

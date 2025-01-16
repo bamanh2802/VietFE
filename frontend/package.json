@@ -65,7 +65,6 @@
     "lottie-react": "^2.4.0",
     "lucide-react": "^0.441.0",
     "mammoth": "^1.8.0",
-    "markdown-it": "^14.1.0",
     "markdown-table": "^3.0.3",
     "next": "^14.2.11",
     "next-i18next": "^15.4.1",
@@ -89,9 +88,6 @@
     "react-syntax-highlighter": "^15.6.1",
     "reactflow": "^11.11.4",
     "rehype-highlight": "^7.0.0",
-    "rehype-katex": "^7.0.1",
-    "remark-gfm": "^4.0.0",
-    "remark-math": "^6.0.0",
     "remixicon": "^4.3.0",
     "si": "^2.0.0",
     "tailwind-merge": "^2.5.2",
@@ -104,7 +100,6 @@
     "zustand": "^5.0.3"
   },
   "devDependencies": {
-    "@tailwindcss/typography": "^0.5.16",
     "@types/node": "20.5.7",
     "@types/qs": "^6.9.16",
     "@types/react": "18.3.3",
