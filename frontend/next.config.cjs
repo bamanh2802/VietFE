@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
-const createNextIntlPlugin = require('next-intl/plugin');
+import createNextIntlPlugin from 'next-intl/plugin';
+
 const withNextIntl = createNextIntlPlugin();
 
 const nextConfig = {
@@ -14,4 +15,4 @@ const nextConfig = {
   // Removed `experimental.appDir` as it's unnecessary
 };
 
-module.exports = withNextIntl(nextConfig);
+export default withNextIntl(nextConfig);
