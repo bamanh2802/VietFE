@@ -52,6 +52,7 @@
     "@types/pdfjs-dist": "^2.10.378",
     "@types/react-syntax-highlighter": "^15.5.13",
     "axios": "^1.7.9",
+    "canvas": "^3.0.1",
     "cheerio": "^1.0.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
