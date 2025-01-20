@@ -1,3 +1,4 @@
+'use client'
 import { useEffect, useState } from "react";
 import { Tabs, Tab } from "@nextui-org/tabs";
 import {

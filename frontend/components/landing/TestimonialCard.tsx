@@ -36,7 +36,8 @@ export const TestimonialCard = ({ image, name, role, content }: TestimonialProps
         </div>
         <Image
           loading="lazy"
-          src="https://cdn.builder.io/api/v1/image/assets/TEMP/0f3523233a7fa57af6bf46bc2dc70313356335e7303ccbe8e9e2f471207bbd3b?placeholderIfAbsent=true&apiKey=6f8a1d6b6ede4dea9ab29771b7b9c7dd"
+src="/img/after.svg" 
+
           alt="" // Không cần alt nếu không có mô tả
           width={57} // Đặt kích thước cho image
           height={41} // Đặt kích thước cho image

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {Image} from "@nextui-org/image";
+import {Image} from "@nextui-org/react";
 import { useTranslations } from 'next-intl';
 import { IconText } from './IconText';
 

@@ -4,15 +4,22 @@ import createNextIntlPlugin from 'next-intl/plugin';
 const withNextIntl = createNextIntlPlugin();
 
 const nextConfig = {
-  reactStrictMode: false, // Enable if possible
+  reactStrictMode: false,
   images: {
-    domains: ['cdn.builder.io'],
+    remotePatterns: [{
+      protocol: 'https',
+      hostname: 'cdn.builder.io'
+    }]
   },
   webpack: (config) => {
-    config.resolve.alias.canvas = false; // Ensure this is necessary
+    config.resolve.alias.canvas = false;
+    config.resolve.fallback = {
+      ...config.resolve.fallback,
+      canvas: false,
+      encoding: false
+    };
     return config;
-  },
-  // Removed `experimental.appDir` as it's unnecessary
+  }
 };
 
 export default withNextIntl(nextConfig);

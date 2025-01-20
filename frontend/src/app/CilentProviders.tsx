@@ -6,7 +6,7 @@ import { Provider } from "react-redux";
 import { store } from "@/src/store/store";
 import { Toaster } from "@/components/ui/toaster";
 import { ReactNode, useEffect, useState } from "react";
-import { useRouter, usePathname } from "next/navigation"; // Import đúng từ next/navigation
+import { useRouter, usePathname } from "next/navigation";
 import { fontSans, fontMono } from "@/config/fonts";
 
 export const fonts = {
@@ -16,29 +16,34 @@ export const fonts = {
 
 export function ClientProviders({ children }: { children: ReactNode }) {
   const router = useRouter();
-  const pathname = usePathname(); // Lấy pathname từ next/navigation
+  const pathname = usePathname();
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const token = localStorage.getItem("access_token");
     const isAuthenticated = !!token;
 
-    // Các route công khai không yêu cầu đăng nhập
     const publicRoutes = ["/", "/login"];
-    const isPublicRoute = ""
-
-    // Kiểm tra nếu đường dẫn là một route chia sẻ
-    const isShareRoute = ""
+    const isPublicRoute = publicRoutes.includes(pathname);
+    const isShareRoute = pathname.startsWith("/share/");
 
     if (!isAuthenticated && !isPublicRoute && !isShareRoute) {
       router.push("/login");
-    } else {
-      setIsLoading(false);
     }
+    
+    setIsLoading(false);
   }, [pathname, router]);
 
   if (isLoading) {
-    return null; // Hoặc một spinner load dữ liệu
+    return (
+      <Provider store={store}>
+        <NextUIProvider>
+          <NextThemesProvider attribute="class" defaultTheme="dark">
+            {/* You could add a loading spinner here if desired */}
+          </NextThemesProvider>
+        </NextUIProvider>
+      </Provider>
+    );
   }
 
   return (
