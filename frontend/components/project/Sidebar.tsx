@@ -67,7 +67,19 @@ interface SidebarProps {
   updatedDocuments: () => void;
   updatedNotes: () => void;
   updatedConversations: () => void;
+  handleContextMenu: (e: React.MouseEvent, id: string, name: string) => void;
+  handleClick: (e: React.MouseEvent, id: string, name: string) => void;
+  handleClickOutside: (event: MouseEvent) => void;
+  selectedId: string,
+  selectedName: string,
+  contextMenu: {
+    show: boolean;
+    x: number;
+    y: number;
+    id: string;
+  },
   params: { project_id: string }; 
+  handleCloseContext: () => void
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
@@ -84,6 +96,13 @@ const Sidebar: React.FC<SidebarProps> = ({
   conversations,
   notes,
   setSelectedNote,
+  handleContextMenu,
+  handleClick,
+  handleClickOutside,
+  selectedId,
+  selectedName,
+  contextMenu,
+  handleCloseContext,
   params
 }) => {
   const router = useRouter();
@@ -91,25 +110,23 @@ const Sidebar: React.FC<SidebarProps> = ({
   const projects = useSelector((state: RootState) => state.projects.projects);
   const [selectedProjectId, setSelectedProjectId] = useState<string>("");
   const [isDeleteDocument, setIsDeleteDocument] = useState<boolean>(false);
-  const [selectedProject, setSelectedProject] = useState<string>("");
-  // const [documents, setDocuments] = useState<Document[]>([])
   const [isLoadingProject, setIsLoadingProject] = useState<boolean>(true);
   const [expandedSections, setExpandedSections] = useState<string[]>([
     "documents, conversation",
   ]);
   const dispatch = useDispatch();
   const [isUploadDocs, setIsUploadDocs] = useState<boolean>(false);
-  const [contextMenu, setContextMenu] = useState({
-    show: false,
-    x: 0,
-    y: 0,
-    id: "",
-  });
+  // const [contextMenu, setContextMenu] = useState({
+  //   show: false,
+  //   x: 0,
+  //   y: 0,
+  //   id: "",
+  // });
   const { project_id } = params
   const [renameDocId, setRenameDocId] = useState("");
   const [newDocumentName, setNewDocumentName] = useState("");
-  const [selectedId, setSelectedId] = useState<string>("");
-  const [selectedName, setSelectedName] = useState<string>("");
+  // const [selectedId, setSelectedId] = useState<string>("");
+  // const [selectedName, setSelectedName] = useState<string>("");
   const [isLoadingDelete, setIsLoadingDelete] = useState<boolean>(false);
 
   const p = useTranslations('Project');
@@ -117,8 +134,10 @@ const Sidebar: React.FC<SidebarProps> = ({
   const handleOpenRename = (docId: string) => {
     setRenameDocId(docId);
     setNewDocumentName(selectedName);
-    setContextMenu({ ...contextMenu, show: false });
+    handleCloseContext()
   };
+
+
 
   const handleRename = async (id: string) => {
     if (newDocumentName?.trim() === "" || newDocumentName === selectedName) {
@@ -127,10 +146,8 @@ const Sidebar: React.FC<SidebarProps> = ({
       });
       setRenameDocId("");
 
-      return; // Không thực hiện đổi tên nếu điều kiện không thỏa
+      return; 
     }
-
-    // Hiển thị toast loading
     toast({
       description: "Loading...",
     });
@@ -139,15 +156,12 @@ const Sidebar: React.FC<SidebarProps> = ({
       let data;
 
       if (id.startsWith("doc-")) {
-        console.log(`Renaming document ${id} to ${newDocumentName}`);
         data = await renameDocument(id, newDocumentName);
         updatedDocuments();
       } else if (id.startsWith("note-")) {
-        console.log(`Renaming note ${id} to ${newDocumentName}`);
         data = await renameNote(id, newDocumentName);
         updatedNotes();
       } else if (id.startsWith("conv-")) {
-        console.log(`Renaming conversation ${id} to ${newDocumentName}`);
         data = await renameConversation(id, newDocumentName);
         updatedConversations();
       }
@@ -158,8 +172,6 @@ const Sidebar: React.FC<SidebarProps> = ({
       });
     } catch (e) {
       console.log("Error during renaming:", e);
-
-      // Thông báo lỗi
       toast({
         variant: "destructive",
         title: "Uh oh! Something went wrong.",
@@ -171,41 +183,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     }
   };
 
-  const handleDelete = async (id: string) => {
-    setContextMenu({ ...contextMenu, show: false });
-    setIsLoadingDelete(true);
-    try {
-      let data;
-
-      if (id.startsWith("doc-")) {
-        console.log(`Deleting document with id ${id}`);
-        data = await deleteDocument(id, project_id as string);
-        updatedDocuments();
-      } else if (id.startsWith("note-")) {
-        console.log(`Deleting note with id ${id}`);
-        data = await deleteNote(id);
-        updatedNotes();
-      } else if (id.startsWith("conv-")) {
-        console.log(`Deleting conversation with id ${id}`);
-        data = await deleteConversation(id);
-        updatedConversations();
-      }
-      toast({
-        title: "Delete successfully",
-        description: "Waiting for data loading",
-      });
-    } catch (e) {
-      console.log("Error during deletion:", e);
-      toast({
-        variant: "destructive",
-        title: "Delete failed!",
-        description: "Something went wrong!",
-      });
-    } finally {
-      setIsLoadingDelete(false);
-      handleOpenDeleteDocument();
-    }
-  };
+ 
 
   useEffect(() => {
     if(project_id !== undefined) {
@@ -227,8 +205,6 @@ const Sidebar: React.FC<SidebarProps> = ({
   const handleGetProjects = async () => {
     try {
       const data = await getAllProjectsWithInfo();
-
-      console.log(data);
       dispatch(setProjects(data.data));
     } catch (e) {
       console.log(e);
@@ -242,9 +218,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     });
     try {
       const data = await createNewNote(project_id as string);
-
       setSelectedNote(data.data.note_id);
-      console.log(data);
       toast({
         title: "New note created successfully",
         description: "Waiting for data loading",
@@ -273,48 +247,48 @@ const Sidebar: React.FC<SidebarProps> = ({
     );
   };
 
-  const handleContextMenu = (e: React.MouseEvent, id: string, name: string) => {
-    e.preventDefault();
+  // const handleContextMenu = (e: React.MouseEvent, id: string, name: string) => {
+  //   e.preventDefault();
   
-    const menuWidth = 200; 
-    const menuHeight = 200; 
-    const { innerWidth, innerHeight } = window;
+  //   const menuWidth = 200; 
+  //   const menuHeight = 200; 
+  //   const { innerWidth, innerHeight } = window;
   
-    let x = e.pageX;
-    let y = e.pageY;
+  //   let x = e.pageX;
+  //   let y = e.pageY;
   
-    if (x + menuWidth > innerWidth) {
-      x = innerWidth - menuWidth - 10; 
-    }
+  //   if (x + menuWidth > innerWidth) {
+  //     x = innerWidth - menuWidth - 10; 
+  //   }
   
-    if (y + menuHeight > innerHeight) {
-      y = innerHeight - menuHeight - 10; 
-    }
+  //   if (y + menuHeight > innerHeight) {
+  //     y = innerHeight - menuHeight - 10; 
+  //   }
   
-    setContextMenu({ show: true, x, y, id });
-    setSelectedId(id);
-    setSelectedName(name);
-  };
+  //   setContextMenu({ show: true, x, y, id });
+  //   setSelectedId(id);
+  //   setSelectedName(name);
+  // };
   
 
-  const handleClick = (e: React.MouseEvent, id: string, name: string) => {
-    setSelectedId(id);
-    setSelectedName(name);
-    e.stopPropagation();
-    e.preventDefault();
-    if (contextMenu.show && contextMenu.id === id) {
-      setContextMenu({ ...contextMenu, show: false }); // Đóng menu nếu đã mở
-    } else {
-      setContextMenu({ show: true, x: e.pageX, y: e.pageY, id }); // Mở menu
-    }
-  };
-  const handleClickOutside = (event: MouseEvent) => {
-    const target = event.target as HTMLElement | null;
+  // const handleClick = (e: React.MouseEvent, id: string, name: string) => {
+  //   setSelectedId(id);
+  //   setSelectedName(name);
+  //   e.stopPropagation();
+  //   e.preventDefault();
+  //   if (contextMenu.show && contextMenu.id === id) {
+  //     setContextMenu({ ...contextMenu, show: false }); // Đóng menu nếu đã mở
+  //   } else {
+  //     setContextMenu({ show: true, x: e.pageX, y: e.pageY, id }); // Mở menu
+  //   }
+  // };
+  // const handleClickOutside = (event: MouseEvent) => {
+  //   const target = event.target as HTMLElement | null;
 
-    if (target && !target.closest(".context-menu")) {
-      setContextMenu({ ...contextMenu, show: false });
-    }
-  };
+  //   if (target && !target.closest(".context-menu")) {
+  //     setContextMenu({ ...contextMenu, show: false });
+  //   }
+  // };
 
   const handleRouterDocument = (docId: string) => {
     const url = `/project/${project_id}/document/${docId}`;
@@ -720,189 +694,9 @@ const Sidebar: React.FC<SidebarProps> = ({
       </div>
     
 
-      <div
-        className={`dark:bg-zinc-800 bg-zinc-50 transition-opacity z-50 ${contextMenu.show && contextMenu.id.startsWith("doc-") ? "visible opacity-100" : "invisible opacity-0"} context-menu absolute rounded-lg shadow-lg w-48`}
-        style={{ top: contextMenu.y, left: contextMenu.x }}
-      >
-        <ListboxWrapper>
-          <Listbox aria-label="Actions">
-            <ListboxItem
-              key="new"
-              textValue="New file"
-              onClick={() => openNewDocument()}
-            >
-              <div className="flex items-center">
-                <PlusIcon className="h-4 w-4 mr-2" />
-                {p('AddDocument')}
-              </div>
-            </ListboxItem>
-            <ListboxItem
-              key="popup"
-              textValue="Pop Up"
-              onClick={() => handleRouterDocument(selectedId)}
-            >
-              <div className="flex items-center">
-                <ArrowTopRightOnSquareIcon className="h-4 w-4 mr-2" />
-                {g('Detail')}
-              </div>
-            </ListboxItem>
-            <ListboxItem
-              key="rename"
-              textValue="Pop Up"
-              onClick={() => handleOpenRename(selectedId)}
-            >
-              <div className="flex items-center">
-                <PencilSquareIcon className="h-4 w-4 mr-2" />
-                {g('Rename')}
-              </div>
-            </ListboxItem>
-            <ListboxItem
-              key="delete"
-              className="text-danger"
-              color="danger"
-              textValue="Pop Up"
-              onClick={() => handleOpenDeleteDocument()}
-            >
-              <div className="flex items-center">
-                <TrashIcon className="h-4 w-4 mr-2" />
-                {g('Delete')}
-              </div>
-            </ListboxItem>
-          </Listbox>
-        </ListboxWrapper>
-      </div>
-      <div
-        className={`dark:bg-zinc-800 bg-zinc-50 transition-opacity z-50 ${contextMenu.show && contextMenu.id.startsWith("conv-") ? "visible opacity-100" : "invisible opacity-0"} context-menu absolute rounded-lg shadow-lg w-48`}
-        style={{ top: contextMenu.y, left: contextMenu.x }}
-      >
-        <ListboxWrapper>
-          <Listbox aria-label="Actions">
-            <ListboxItem key="create" textValue="Pop Up" onClick={onOpenDialog}>
-              <div className="flex items-center">
-                <ChatBubbleLeftIcon className="h-4 w-4 mr-2" />
-                {p('AddConversation')}
-              </div>
-            </ListboxItem>
-            <ListboxItem key="popup" textValue="Pop Up">
-              <div
-                className="flex items-center"
-                onClick={() => handleRouterConversation(selectedId)}
-              >
-                <ArrowTopRightOnSquareIcon className="h-4 w-4 mr-2" />
-                {g('Detail')}
-              </div>
-            </ListboxItem>
-            <ListboxItem
-              key="rename"
-              textValue="Pop Up"
-              onClick={() => handleOpenRename(selectedId)}
-            >
-              <div className="flex items-center">
-                <PencilSquareIcon className="h-4 w-4 mr-2" />
-                {g('Rename')}
-              </div>
-            </ListboxItem>
-            <ListboxItem
-              key="delete"
-              className="text-danger"
-              color="danger"
-              textValue="Pop Up"
-              onClick={() => handleOpenDeleteDocument()}
-            >
-              <div className="flex items-center">
-                <TrashIcon className="h-4 w-4 mr-2" />
-                {g('Delete')}
-              </div>
-            </ListboxItem>
-          </Listbox>
-        </ListboxWrapper>
-      </div>
-      <div
-        className={`dark:bg-zinc-800 bg-zinc-50 transition-opacity z-50 ${contextMenu.show && contextMenu.id.startsWith("note-") ? "visible opacity-100" : "invisible opacity-0"} context-menu absolute rounded-lg shadow-lg w-48`}
-        style={{ top: contextMenu.y, left: contextMenu.x }}
-      >
-        <ListboxWrapper>
-          <Listbox aria-label="Actions">
-            <ListboxItem
-              key="create"
-              textValue="Pop Up"
-              onClick={() => {
-                setContextMenu({ ...contextMenu, show: false });
-                handleCreateNewNote();
-              }}
-            >
-              <div className="flex items-center">
-                <ChatBubbleLeftIcon className="h-4 w-4 mr-2" />
-                {p('AddNote')}
-              </div>
-            </ListboxItem>
-            <ListboxItem
-              key="popup"
-              textValue="Pop Up"
-              onClick={() => {
-                setContextMenu({ ...contextMenu, show: false });
-                setSelectedNote(selectedId);
-              }}
-            >
-              <div className="flex items-center">
-                <ArrowTopRightOnSquareIcon className="h-4 w-4 mr-2" />
-                {g('Detail')}
-              </div>
-            </ListboxItem>
-            <ListboxItem
-              key="rename"
-              textValue="Pop Up"
-              onClick={() => handleOpenRename(selectedId)}
-            >
-              <div className="flex items-center">
-                <PencilSquareIcon className="h-4 w-4 mr-2" />
-                {g('Rename')}
-              </div>
-            </ListboxItem>
-            <ListboxItem
-              key="delete"
-              className="text-danger"
-              color="danger"
-              textValue="Pop Up"
-              onClick={() => handleOpenDeleteDocument()}
-            >
-              <div className="flex items-center">
-                <TrashIcon className="h-4 w-4 mr-2" />
-                {g('Delete')}
-              </div>
-            </ListboxItem>
-          </Listbox>
-        </ListboxWrapper>
-      </div>
+      
 
-      <AlertDialog
-        open={isDeleteDocument}
-        onOpenChange={() => handleOpenDeleteDocument()}
-      >
-        <AlertDialogContent className="dark:bg-zinc-800 border-none">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center">
-              <ExclamationCircleIcon className="w-6 h-6 mr-2" />
-              {p('DeleteTitle')}
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              {p('DeleteDescription1')}{" "}
-              <span className="font-bold">{selectedName}</span> 
-              {p('DeleteDescription2')}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <Button onClick={() => handleOpenDeleteDocument()}>Cancel</Button>
-            <Button
-              color="danger"
-              isLoading={isLoadingDelete}
-              onClick={() => handleDelete(selectedId)}
-            >
-              {g('Delete')}
-            </Button>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      
 
       <Dialog open={isUploadDocs} onOpenChange={() => setIsUploadDocs(false)}>
         <DialogContent>

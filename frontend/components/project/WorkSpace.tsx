@@ -18,7 +18,6 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { createNewNote } from "@/service/noteApi";
 import { useToast } from "@/hooks/use-toast";
 
 import { Document, ImageType, Conversation, Note } from "@/src/types/types";
@@ -33,6 +32,9 @@ interface WorkSpaceProps {
   onOpenDialog: () => void;
   setSelectedNote: (note: string) => void;
   updatedNotes: () => void;
+  handleCloseContext: () => void
+  handleContextMenu: (e: React.MouseEvent, id: string, name: string) => void;
+  handleCreateNewNote: () => void
 }
 const WorkSpace: React.FC<WorkSpaceProps> = ({
   updatedNotes,
@@ -44,6 +46,9 @@ const WorkSpace: React.FC<WorkSpaceProps> = ({
   images,
   conversations,
   notes,
+  handleContextMenu,
+  handleCloseContext,
+  handleCreateNewNote
 }) => {
   const { toast } = useToast();
   const handleRouterWorkspace = (conversationId: string) => {
@@ -90,20 +95,7 @@ const WorkSpace: React.FC<WorkSpaceProps> = ({
     return date.toLocaleDateString("en-US", options);
   }
 
-  const handleCreateNewNote = async () => {
-    try {
-      const data = await createNewNote(projectId);
-
-      setSelectedNote(data.data.note_id);
-      updatedNotes();
-      toast({
-        title: "New note created successfully",
-        description: "Waiting for data loading",
-      });
-    } catch (e) {
-      console.log(e);
-    }
-  };
+  
 
   return (
     <div
@@ -148,7 +140,9 @@ const WorkSpace: React.FC<WorkSpaceProps> = ({
                         className="basis-1/4 shadow-none"
                         onClick={() => handleOpenWorkspace(conv)}
                       >
-                        <Card className="shadow-none hover:scale-[1.01] cursor-pointer">
+                        <Card 
+                        onContextMenu={(e) => handleContextMenu(e, conv.conversation_id, conv.conversation_name)}
+                        className="shadow-none hover:scale-[1.01] cursor-pointer">
                           <CardHeader className="flex gap-3 items-center">
                             <Image
                               alt="nextui logo"
@@ -209,7 +203,8 @@ const WorkSpace: React.FC<WorkSpaceProps> = ({
                       onClick={openNewDocument}
                     >
                       <Tooltip content="Add new Document">
-                        <Card className="shadow-none bg-opacity-0 w-[180px] h-[120px] flex justify-center items-center">
+                        <Card 
+                        className="shadow-none bg-opacity-0 w-[180px] h-[120px] flex justify-center items-center">
                           <PlusIcon className="w-h-16 h-16" />
                         </Card>
                       </Tooltip>
@@ -233,7 +228,9 @@ const WorkSpace: React.FC<WorkSpaceProps> = ({
                           className="cursor-pointer shadow-none basis-1/5 hover:scale-[1.01] transition-all"
                           onClick={() => handleRouterToDocument(doc)}
                         >
-                          <Card className="shadow-none max-w-[180px]">
+                          <Card 
+                          onContextMenu={(e) => handleContextMenu(e, doc.document_id, doc.document_name)}
+                          className="shadow-none max-w-[180px]">
                             <CardBody className="overflow-hidden p-0 h-[40px]">
                               <Image
                                 isZoomed
@@ -291,7 +288,9 @@ const WorkSpace: React.FC<WorkSpaceProps> = ({
                       className="cursor-pointer basis-1/5 hover:scale-[1.01] transition-all"
                       onClick={() => setSelectedNote(note.note_id)}
                     >
-                      <div className="dark:bg-zinc-700 bg-zinc-200 rounded-lg flex-shrink-0">
+                      <div 
+                        onContextMenu={(e) => handleContextMenu(e, note.note_id, note.title)}
+                        className="dark:bg-zinc-700 bg-zinc-200 rounded-lg flex-shrink-0">
                         <div className="flex items-center justify-center h-12 bg-zinc-100 dark:bg-zinc-800 rounded-t-lg relative opacity-80">
                           <i className="ri-booklet-line absolute left-4 top-8 text-3xl" />
                         </div>

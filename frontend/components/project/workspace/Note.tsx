@@ -81,12 +81,13 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   
       const contentObject = content.document; 
       const context = contentObject
-        .map((block: any) => 
-          block.content
-            .map((item: any) => item.text) 
-            .join("") 
-        )
-        .join(" "); 
+      .map((block: any) => 
+        Array.isArray(block.content) 
+          ? block.content.map((item: any) => item.text).join("") 
+          : ""  
+      )
+      .join(" ");
+
   
   
       editNote(note.note_id, context, formatted_text);

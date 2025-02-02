@@ -57,15 +57,7 @@ export function TranslationPopup({ text, onClose, onSaveNote, position }: Transl
     }}
     className="max-w-80 fixed bg-zinc-100 dark:bg-zinc-900 rounded-lg shadow-lg p-2 min-w-[200px]">
       <div className="flex flex-col gap-2">
-            {result === '' ? (
-                    <div className="flex items-center justify-center">
-                    <Loader2 className="h-4 w-4 animate-spin text-zinc-400" />
-                    </div>
-                ) : (
-                    result
-                )}
-        
-        <div className="flex items-center gap-1">
+      <div className="flex items-center gap-1">
           <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-400 hover:text-white hover:bg-zinc-800" onClick={handleCopy}>
             <Copy className="h-4 w-4" />
           </Button>
@@ -79,7 +71,16 @@ export function TranslationPopup({ text, onClose, onSaveNote, position }: Transl
             <X className="h-4 w-4" />
           </Button>
         </div>
-
+            {result === '' ? (
+                    <div className="flex items-center justify-center">
+                    <Loader2 className="h-4 w-4 animate-spin text-zinc-400" />
+                    </div>
+                ) : (
+                    <div className='max-h-96 overflow-auto'> 
+                      {result}
+                    </div>
+                )}
+        
         {showSettings && (
           <div className="px-2 py-1 space-y-2">
             <div className="space-y-1">

@@ -145,12 +145,12 @@ const MiniNote: React.FC<MiniNoteProps> = ({ projectId }) => {
       const formatted_text = JSON.stringify(content.document);
       const contentObject = content.document; 
       const context = contentObject
-        .map((block: any) => 
-          block.content
-            .map((item: any) => item.text) 
-            .join("") 
-        )
-        .join(" "); 
+      .map((block: any) => 
+        Array.isArray(block.content) 
+          ? block.content.map((item: any) => item.text).join("") 
+          : ""  
+      )
+      .join(" ");
         
         
         if (selectedNote !== null) {
