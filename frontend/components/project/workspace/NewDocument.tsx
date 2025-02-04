@@ -72,7 +72,7 @@ const NewDocument: FC<NewDocumentProps> = ({
 
   const handleUrlUpload = async (url: string) => {
     try {
-      const data = await uploadUrlDocument(url, projectId as string)
+      await uploadUrlDocument(url, projectId as string)
     } catch (e) {
       console.log(e)
     }
@@ -266,7 +266,7 @@ const NewDocument: FC<NewDocumentProps> = ({
   const ProgressTracker = ({ uploadProgress }: { uploadProgress: { [key: string]: { progress: number, message: string } } }) => {
     const progressCards = useMemo(() => {
       return Object.entries(uploadProgress).map(([filename, details]) => (
-        <Card key={filename} className="max-w-96" aria-label="file progress">
+        <Card key={filename} className="w-96" aria-label="file progress">
           <CardBody className="px-4 py-2" aria-label="file progress">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
               <span aria-label="file progress" className="text-base font-medium truncate w-full">{filename}</span>
@@ -274,7 +274,7 @@ const NewDocument: FC<NewDocumentProps> = ({
                 {details.message}
               </Chip>
               <Chip className="ml-1" size="sm" variant="flat" color="success">
-                {details.progress}
+                {details.progress} %
               </Chip>
             </div>
             <Progress aria-label="file progress" className="max-w-md mt-2" size="sm" value={details.progress} />

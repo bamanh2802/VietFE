@@ -216,18 +216,33 @@ const Sidebar: React.FC<SidebarProps> = ({
       title: "Creating...",
       description: "Waiting for create",
     });
+  
     try {
       const data = await createNewNote(project_id as string);
       setSelectedNote(data.data.note_id);
+  
       toast({
         title: "New note created successfully",
         description: "Waiting for data loading",
       });
+  
       updatedNotes();
-    } catch (e) {
-      console.log(e);
+    } catch (error: any) {
+      console.error("Error creating note:", error);
+  
+      const errorMessage =
+        error.response?.data?.message || "Something went wrong. Please try again.";
+  
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
     }
   };
+  
+  
 
   const getProjectNameById = (projectId: string | null) => {
     const project = projects?.find((proj) => proj.project_id === projectId);
@@ -246,49 +261,6 @@ const Sidebar: React.FC<SidebarProps> = ({
         : [...prev, section],
     );
   };
-
-  // const handleContextMenu = (e: React.MouseEvent, id: string, name: string) => {
-  //   e.preventDefault();
-  
-  //   const menuWidth = 200; 
-  //   const menuHeight = 200; 
-  //   const { innerWidth, innerHeight } = window;
-  
-  //   let x = e.pageX;
-  //   let y = e.pageY;
-  
-  //   if (x + menuWidth > innerWidth) {
-  //     x = innerWidth - menuWidth - 10; 
-  //   }
-  
-  //   if (y + menuHeight > innerHeight) {
-  //     y = innerHeight - menuHeight - 10; 
-  //   }
-  
-  //   setContextMenu({ show: true, x, y, id });
-  //   setSelectedId(id);
-  //   setSelectedName(name);
-  // };
-  
-
-  // const handleClick = (e: React.MouseEvent, id: string, name: string) => {
-  //   setSelectedId(id);
-  //   setSelectedName(name);
-  //   e.stopPropagation();
-  //   e.preventDefault();
-  //   if (contextMenu.show && contextMenu.id === id) {
-  //     setContextMenu({ ...contextMenu, show: false }); // Đóng menu nếu đã mở
-  //   } else {
-  //     setContextMenu({ show: true, x: e.pageX, y: e.pageY, id }); // Mở menu
-  //   }
-  // };
-  // const handleClickOutside = (event: MouseEvent) => {
-  //   const target = event.target as HTMLElement | null;
-
-  //   if (target && !target.closest(".context-menu")) {
-  //     setContextMenu({ ...contextMenu, show: false });
-  //   }
-  // };
 
   const handleRouterDocument = (docId: string) => {
     const url = `/project/${project_id}/document/${docId}`;
@@ -362,7 +334,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           size="sm"
           startContent={<MagnifyingGlassIcon className="w-4 h-4" />}
           variant="flat"
-          onClick={openSearch}
+          onPress={openSearch}
         >
           {g('Search')}
         </Button>

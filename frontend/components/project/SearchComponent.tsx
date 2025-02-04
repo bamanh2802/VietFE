@@ -189,7 +189,7 @@ const SearchComponent: React.FC<SearchComponentProps> = ({
   const highlightText = (text: string, searchTerm: string) => {
     if (!searchTerm) return text;
     const regex = new RegExp(`(${searchTerm})`, 'gi'); // Biểu thức chính quy để tìm kiếm từ khóa
-    return text.split(regex).map((part, index) =>
+    return text?.split(regex).map((part, index) =>
       part.toLowerCase() === searchTerm.toLowerCase() ? (
         <strong key={index} className="text-bold">{part}</strong>
       ) : part
@@ -234,13 +234,13 @@ const SearchComponent: React.FC<SearchComponentProps> = ({
                         <ListboxItem
                           key={index}
                           textValue="item"
-                          className="group flex items-center justify-between"
+                          className="group flex items-center justify-between list-item-config"
                           endContent={
                             <ChevronDoubleRightIcon className="h-4 w-4 dark:text-gray-400 text-gray-700 opacity-0 group-hover:opacity-95 transition-all" />
                           }
-                          onClick={() => handleRouterToDocument(doc)}
+                          onPress={() => handleRouterToDocument(doc)}
                         >
-                          <span className="flex items-center">
+                          <span className="flex items-center w-full overflow-hidden">
                             <DocumentTextIcon className="w-4 h-4 mr-2" />
                             {highlightText(doc.document_name, searchTerm)}
                           </span>
@@ -260,12 +260,12 @@ const SearchComponent: React.FC<SearchComponentProps> = ({
                         <ListboxItem
                           textValue="item"
                           key={index}
-                          className="group flex items-center justify-between"
+                          className="group flex items-center justify-between list-item-config"
                           endContent={
                             <ChevronDoubleRightIcon className="h-4 w-4 dark:text-gray-400 text-gray-700 opacity-0 group-hover:opacity-95 transition-all" />
                           }
                         >
-                          <span className="flex items-center">
+                          <span className="flex items-center w-full overflow-hidden">
                             <DocumentTextIcon className="w-4 h-4 mr-2" />
                             {highlightText(note.title, searchTerm)}
                           </span>
@@ -285,13 +285,13 @@ const SearchComponent: React.FC<SearchComponentProps> = ({
                         <ListboxItem
                           textValue="item"
                           key={index}
-                          className="group flex items-center justify-between"
+                          className="group flex items-center justify-between list-item-config"
                           endContent={
                             <ChevronDoubleRightIcon className="h-4 w-4 dark:text-gray-400 text-gray-700 opacity-0 group-hover:opacity-95 transition-all" />
                           }
-                          onClick={() => handleRouterToProject(project)}
+                          onPress={() => handleRouterToProject(project)}
                         >
-                          <span className="flex items-center">
+                          <span className="flex items-center w-full overflow-hidden">
                             <UserGroupIcon className="w-4 h-4 mr-2" />
                             {highlightText(project.name, searchTerm)}
                           </span>
@@ -311,13 +311,13 @@ const SearchComponent: React.FC<SearchComponentProps> = ({
                         <ListboxItem
                           textValue="item"
                           key={index}
-                          className="group flex items-center justify-between"
+                          className="group flex items-center justify-between list-item-config"
                           endContent={
                             <ChevronDoubleRightIcon className="h-4 w-4 dark:text-gray-400 text-gray-700 opacity-0 group-hover:opacity-95 transition-all" />
                           }
-                          onClick={() => handleRouterToConversation(conversation)}
+                          onPress={() => handleRouterToConversation(conversation)}
                         >
-                          <span className="flex items-center">
+                          <span className="flex items-center w-full overflow-hidden">
                             <ChatBubbleLeftIcon className="w-4 h-4 mr-2" />
                             {highlightText(conversation.conversation_name, searchTerm)}
                           </span>
@@ -337,12 +337,12 @@ const SearchComponent: React.FC<SearchComponentProps> = ({
                         <ListboxItem
                           textValue="item"
                           key={index}
-                          className="group flex items-center justify-between"
+                          className="group flex items-center justify-between list-item-config"
                           endContent={
                             <ChevronDoubleRightIcon className="h-4 w-4 dark:text-gray-400 text-gray-700 opacity-0 group-hover:opacity-95 transition-all" />
                           }
                         >
-                          <span className="flex items-center">
+                          <span className="flex items-center w-full overflow-hidden">
                             <DocumentTextIcon className="w-4 h-4 mr-2" />
                             {highlightText(note?.note_title, searchTerm)}
                           </span>
@@ -365,12 +365,12 @@ const SearchComponent: React.FC<SearchComponentProps> = ({
                         <ListboxItem
                           textValue="item"
                           key={index}
-                          className="group flex items-center justify-between"
+                          className="group flex items-center justify-between list-item-config"
                           endContent={
                             <ChevronDoubleRightIcon className="h-4 w-4 dark:text-gray-400 text-gray-700 opacity-0 group-hover:opacity-95 transition-all" />
                           }
                         >
-                          <span className="flex items-center">
+                          <span className="flex items-center w-full overflow-hidden">
                             <DocumentTextIcon className="w-4 h-4 mr-2" />
                             {highlightText(document.document_name, searchTerm)}
                           </span>

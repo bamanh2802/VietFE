@@ -37,17 +37,9 @@ import { deleteProjectById, renameProjectById } from "@/service/apis";
 
 import { useTranslations } from 'next-intl';
 import { Project, Document, Conversation } from "@/src/types/types"; 
+import { useToast } from "@/hooks/use-toast";
 
-import {
-  AlertDialog,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { ListboxWrapper } from "../ListboxWrapper";
 import NewUserPrompt from "./NewUserPrompt";
 
@@ -66,6 +58,7 @@ const HomeMain: React.FC<HomeMainProps> = ({
   projects: initialProjects,
   onProjectsUpdate,
 }) => {
+  const { toast } = useToast();
   const router = useRouter();
   const [selectedTab, setSelectedTab] = useState("recent");
   const [recentProjects, setRecentProject] = useState<Project[]>([]);
@@ -243,29 +236,36 @@ const HomeMain: React.FC<HomeMainProps> = ({
   const handleDeleteProject = async () => {
     setIsLoadingDelete(true);
     try {
-      const data = await deleteProjectById(
+      await deleteProjectById(
         selectedProject?.project_id as string,
       );
-
-      console.log(data);
-      setIsOpenDelete(!isOpenDelete);
-      setIsLoadingDelete(false);
+      toast({
+        title: "Delete successfully",
+        description: "Waiting for data loading",
+      });
+      
       handleDeleteProjectFE(selectedProject?.project_id as string);
     } catch (e) {
       setIsLoadingDelete(false);
       console.log(e);
+      toast({
+        variant: "destructive",
+        title: "Delete failed!",
+        description: "Something went wrong!",
+      });
+    } finally {
+      setIsOpenDelete(!isOpenDelete);
+      setIsLoadingDelete(false);
     }
   };
 
   const handleRenameProject = async () => {
     setIsLoadingRename(true);
     try {
-      const data = await renameProjectById(
+      await renameProjectById(
         selectedProject?.project_id as string,
         selectedProject?.name as string,
       );
-
-      console.log(data);
       handleRenameProjectFE(selectedProject as Project);
     } catch (e) {
       console.log(e);
@@ -694,7 +694,7 @@ const HomeMain: React.FC<HomeMainProps> = ({
             <ListboxItem
               key="rename"
               textValue="Pop Up"
-              onClick={() => handleToggleRename()}
+              onPress={() => handleToggleRename()}
             >
               <div className="flex items-center">
                 <PencilSquareIcon className="h-4 w-4 mr-2" />
@@ -706,7 +706,7 @@ const HomeMain: React.FC<HomeMainProps> = ({
               className="text-danger"
               color="danger"
               textValue="Pop Up"
-              onClick={() => handleToggleDelete()}
+              onPress={() => handleToggleDelete()}
             >
               <div className="flex items-center">
                 <TrashIcon className="h-4 w-4 mr-2" />

@@ -20,14 +20,10 @@ import {ChatBubbleLeftIcon} from "@heroicons/react/24/outline";
 
 import { Conversation } from "@/src/types/types";
 import { ListboxWrapper } from "@/components/ListboxWrapper";
-import {
-  AlertDialog,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import SearchComponent from "../SearchComponent";
+
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@nextui-org/modal"
+
 import {
   renameConversation,
   getDocumentInProject,
@@ -47,7 +43,8 @@ interface SidebarWorkspaceProps {
   updatedConversations: () => void;
   projectId: string;
   params: { project_id: string, conversation_id: string }
-  isOpen: boolean
+  isOpen: boolean,
+  consersationId: string
 }
 
 const SidebarWorkspace: FC<SidebarWorkspaceProps> = ({
@@ -56,7 +53,8 @@ const SidebarWorkspace: FC<SidebarWorkspaceProps> = ({
   updatedConversations,
   projectId,
   params,
-  isOpen
+  isOpen,
+  consersationId
 }) => {
   const router = useRouter();
   const { toast } = useToast();
@@ -67,6 +65,7 @@ const SidebarWorkspace: FC<SidebarWorkspaceProps> = ({
     y: number;
     id: string | null;
   }>({ x: 0, y: 0, id: null });
+  const [isOpenSearch, setIsOpenSearch] = useState<boolean>(false)
   const [isDeleteConversation, setIsDeleteConversation] =
     useState<boolean>(false);
   const [selectedConversationId, setSelectedConversationId] =
@@ -81,7 +80,7 @@ const SidebarWorkspace: FC<SidebarWorkspaceProps> = ({
   const [documents, setDocuments] = useState<Document[]>([]);
 
   const g = useTranslations('Global');
-
+  const t = useTranslations('Home');
   useEffect(()=> {
     if(!isOpen) {
       setIsCompactSidebar(true)
@@ -90,6 +89,11 @@ const SidebarWorkspace: FC<SidebarWorkspaceProps> = ({
     }
 
   }, [isOpen])
+
+  const handleToogleSearch = () => {
+    setIsOpenSearch(!isOpenSearch)
+  }
+
   const handleToggleNewConversation = () =>
     setOpenNewConversation(!openNewConversation);
   const handleDelete = async () => {
@@ -139,9 +143,7 @@ const SidebarWorkspace: FC<SidebarWorkspaceProps> = ({
       description: "Loading...",
     });
     try {
-      const data = await renameConversation(id, newName);
-
-      console.log(data);
+      await renameConversation(id, newName);
       updatedConversations();
       toast({
         description: "Rename Successfully!",
@@ -193,16 +195,16 @@ const SidebarWorkspace: FC<SidebarWorkspaceProps> = ({
   };
 
   useEffect(() => {
-    if (conversation_id !== undefined) {
+    if (consersationId !== undefined) {
       const selectedConv = conversations.find(
-        (conv) => conversation_id === conv.conversation_id,
+        (conv) => consersationId === conv.conversation_id,
       );
 
       if (selectedConv) {
         onSelectConversation(selectedConv);
       }
     }
-  }, [conversation_id, conversations]);
+  }, [consersationId, conversations]);
   useEffect(() => {
     if (project_id !== undefined) {
       handleGetDocuments();
@@ -213,7 +215,7 @@ const SidebarWorkspace: FC<SidebarWorkspaceProps> = ({
     sortedConversations?.length > 0 ? (
       <div className="mt-1 space-y-1">
         {sortedConversations.map((conv) => {
-          const isSelected = conversation_id === conv.conversation_id;
+          const isSelected = consersationId === conv.conversation_id;
 
           return (
             <div
@@ -287,7 +289,7 @@ const SidebarWorkspace: FC<SidebarWorkspaceProps> = ({
       <div className="flex justify-between items-center">
         <Button
           isIconOnly
-          onClick={() => setIsCompactSidebar(!isCompactSidebar)}
+          onPress={() => setIsCompactSidebar(!isCompactSidebar)}
         >
           <ChevronLeftIcon className="w-4 h-4" />
         </Button>
@@ -322,6 +324,7 @@ const SidebarWorkspace: FC<SidebarWorkspaceProps> = ({
           isIconOnly={isCompactSidebar}
           className="w-full mt-3"
           size="sm"
+          onPress={handleToogleSearch}
           startContent={<MagnifyingGlassIcon className="w-4 h-4" />}
         >
           {!isCompactSidebar ? g('Search') : ''}
@@ -336,7 +339,7 @@ const SidebarWorkspace: FC<SidebarWorkspaceProps> = ({
 
         {/* Menu Context Tùy Chỉnh */}
         <div
-          className={`dark:bg-zinc-800 bg-zinc-200 ${contextMenu.id ? "visible opacity-100" : "invisible opacity-0"} absolute rounded shadow-lg z-10`}
+          className={`bg-zinc-100 dark:bg-zinc-800 transition-opacity z-50 ${contextMenu.id ? "visible opacity-100" : "invisible opacity-0"} context-menu absolute rounded-lg shadow-lg border-zinc-50 w-36`}
           style={{ top: contextMenu.y, left: contextMenu.x }}
         >
           <ListboxWrapper>
@@ -344,7 +347,7 @@ const SidebarWorkspace: FC<SidebarWorkspaceProps> = ({
               <ListboxItem
                 key="rename"
                 textValue="Pop Up"
-                onClick={() => handleOpenRename()}
+                onPress={() => handleOpenRename()}
               >
                 <div className="flex items-center">
                   <PencilSquareIcon className="h-4 w-4 mr-2" />
@@ -356,7 +359,7 @@ const SidebarWorkspace: FC<SidebarWorkspaceProps> = ({
                 className="text-danger"
                 color="danger"
                 textValue="Pop Up"
-                onClick={() => handleOpenDeleteConversation()}
+                onPress={() => handleOpenDeleteConversation()}
               >
                 <div className="flex items-center">
                   <TrashIcon className="h-4 w-4 mr-2" />
@@ -367,37 +370,41 @@ const SidebarWorkspace: FC<SidebarWorkspaceProps> = ({
           </ListboxWrapper>
         </div>
       </div>
-
-      <AlertDialog
-        open={isDeleteConversation}
-        onOpenChange={() => handleOpenDeleteConversation()}
+      <Modal 
+      backdrop="blur"
+      isOpen={isDeleteConversation} 
+        onOpenChange={handleOpenDeleteConversation}
+        classNames={{
+          base: "dark:bg-zinc-900 bg-zinc-50",
+          header: "border-b border-gray-200 dark:border-gray-700",
+          body: "py-6",
+          footer: "border-t border-gray-200 dark:border-gray-700"
+        }}
       >
-        <AlertDialogContent className="dark:bg-zinc-800 border-none">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center">
-              <ExclamationCircleIcon className="w-6 h-6 mr-2" />
-              Do you really want to delete
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone.{" "}
-              <span className="font-bold">{selectedConversationName}</span>{" "}
-              cannot be restored.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <Button onClick={() => handleOpenDeleteConversation()}>
-              Cancel
-            </Button>
-            <Button
-              color="danger"
-              isLoading={isLoading}
-              onClick={() => handleDelete()}
-            >
-              Delete
-            </Button>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader className="flex items-center gap-2">
+                <ExclamationCircleIcon className="w-6 h-6 text-danger" />
+                <h2 className="text-lg font-semibold">{t('DeleteProjectTitle')} {selectedConversationName}?</h2>
+              </ModalHeader>
+              <ModalBody>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  {t('DeleteProjectDescription')}
+                </p>
+              </ModalBody>
+              <ModalFooter>
+                <Button color="default" variant="bordered" onPress={onClose}>
+                  {g('Cancel')}
+                </Button>
+                <Button color="danger" isLoading={isLoading} onPress={handleDelete}>
+                  {g('Delete')}
+                </Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
 
       <NewWorkspace
         documents={documents as Document[]}
@@ -406,6 +413,14 @@ const SidebarWorkspace: FC<SidebarWorkspaceProps> = ({
         projectId={project_id as string}
         updateConversation={updatedConversations}
         onClose={handleToggleNewConversation}
+      />
+      <SearchComponent
+        conversations={conversations as Conversation[]}
+        documents={documents as Document[]}
+        isOpen={isOpenSearch}
+        notes={[]}
+        projects={[]}
+        onClose={handleToogleSearch}
       />
     </div>
   );

@@ -7,20 +7,20 @@ import { UserIcon,
   Bars3Icon,
 } from "@heroicons/react/24/outline";
 import { UsersIcon } from "lucide-react";
-
+import {
+  Dropdown,
+  DropdownTrigger,
+  DropdownMenu,
+  DropdownSection,
+  DropdownItem
+} from "@heroui/dropdown";
 import dynamic from "next/dynamic";
 import { useMemo } from "react";
 
 import { Note } from "@/src/types/types";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Button } from "@nextui-org/button";
 import ResultDisplay from "./ResultDisplay";
 import ShareWorkspace from "./ShareWorkspace";
 interface RichTextEditorProps {
@@ -29,7 +29,8 @@ interface RichTextEditorProps {
   renameNote: (noteId: string, newName: string) => void;
   editNote: (noteId: string, content: string, formatted_text: string) => void;
   editable: boolean;
-  type: string
+  type: string,
+  owner: string
 }
 
 const RichTextEditor: React.FC<RichTextEditorProps> = ({
@@ -38,7 +39,8 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   renameNote,
   editNote,
   editable,
-  type
+  type,
+  owner
 }) => {
   const [editorContent, setEditorContent] = useState("");
   const editorRef = useRef<HTMLDivElement>(null);
@@ -71,7 +73,6 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   }, [note, isLoading]);
 
   const handleEditorChange = (content: any) => {
-    console.log(content);
     if (debounceTimeout) {
       clearTimeout(debounceTimeout);
     }
@@ -153,29 +154,33 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
                 value={title}
                 onChange={handleTitleChange}
               />
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost"><Bars3Icon className="w-4 h-4"/></Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuItem onSelect={() => handleDropdownAction('find')}>
-                    <MagnifyingGlassIcon className="mr-2 h-4 w-4" />
-                    <span>Find</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onSelect={() => handleDropdownAction('summarize')}>
-                    <DocumentTextIcon className="mr-2 h-4 w-4" />
-                    <span>Summarize</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onSelect={() => handleDropdownAction('createOutline')}>
-                    <ListBulletIcon className="mr-2 h-4 w-4" />
-                    <span>Create Outline</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onSelect={() => handleDropdownAction('share')}>
-                    <UsersIcon className="mr-2 h-4 w-4" />
-                    <span>Share</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <Dropdown>
+                <DropdownTrigger asChild>
+                  <Button isIconOnly variant="light"><Bars3Icon className="w-4 h-4"/></Button>
+                </DropdownTrigger>
+                <DropdownMenu >
+                  <DropdownItem
+                  startContent={<MagnifyingGlassIcon className="mr-2 h-4 w-4" />}
+                  className="flex items-center" key='find' onPress={() => handleDropdownAction('find')}>
+                    Find
+                  </DropdownItem>
+                  <DropdownItem
+                  startContent={<DocumentTextIcon className="mr-2 h-4 w-4" />}
+                  key='summarize' onPress={() => handleDropdownAction('summarize')}>
+                    Summarize
+                  </DropdownItem>
+                  <DropdownItem
+                  startContent={<ListBulletIcon className="mr-2 h-4 w-4" />}
+                  key='create-outline' onPress={() => handleDropdownAction('createOutline')}>
+                    Create Outline
+                  </DropdownItem>
+                  <DropdownItem
+                  startContent={<UsersIcon className="mr-2 h-4 w-4" />}
+                  key='share' onPress={() => handleDropdownAction('share')}>
+                    Share
+                  </DropdownItem>
+                </DropdownMenu>
+              </Dropdown>
             </>
           )}
         </CardHeader>
@@ -193,7 +198,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
                 <span className="text-sm text-gray-400">Owner</span>
               </div>
               <div className="flex items-center space-x-2">
-                <span className="text-sm">Nguyễn Bá Mạnh</span>
+                <span className="text-sm">{owner ? owner : 'Not found'}</span>
               </div>
               <div className="flex items-center space-x-2">
                 <span className="text-sm text-gray-400">

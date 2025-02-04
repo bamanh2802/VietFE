@@ -35,6 +35,7 @@ const WorkSpace: React.FC<WorkSpaceProps> = ({params}) => {
   const [conversationName, setConversationName] = useState<string>("");
   const router = useRouter();
   const { project_id, conversation_id } = params
+  const [conversationId, setConversationId] = useState<string>('')
   const [projectInfo, setProjectInfo] = useState<Project>();
   const p = useTranslations('Project');
   const g = useTranslations('Global');
@@ -85,6 +86,15 @@ const WorkSpace: React.FC<WorkSpaceProps> = ({params}) => {
   }, [project_id]);
 
 
+  useEffect(() => {
+    if(conversation_id) {
+      if (conversation_id !== conversationId) {
+        setConversationId(conversation_id)
+      }
+    }
+
+  }, [conversation_id])
+
   const handleGetConversation = async () => {
     try {
       const data = await getConversationInProject(project_id as string);
@@ -115,19 +125,14 @@ const WorkSpace: React.FC<WorkSpaceProps> = ({params}) => {
     router.push("/home");
   };
 
-  useEffect(() => {
-    if (project_id !== undefined) {
-      Promise.all([
-        handleGetConversation(),
-        handleGetProjectById()
-      ])
-        .then(() => setIsLoading(false))
-        .catch((err) => console.error(err))
-    }
-  }, [project_id]);
 
   const handleSelectConversation = (conv: Conversation) => {
-    router.push(`/project/${project_id}/conversation/${conv.conversation_id}`);
+    window.history.pushState(
+      {}, 
+      '', 
+      `/project/${project_id}/conversation/${conv.conversation_id}`
+    );
+    setConversationId(conv.conversation_id)
     setConversationName(conv.conversation_name);
   };
 
@@ -145,6 +150,7 @@ const WorkSpace: React.FC<WorkSpaceProps> = ({params}) => {
         <title>{conversationName}</title>
       </Head>
       <SidebarWorkspace
+      consersationId={conversationId}
         conversations={conversations}
         updatedConversations={handleGetConversation}
         onSelectConversation={handleSelectConversation}
@@ -184,7 +190,7 @@ const WorkSpace: React.FC<WorkSpaceProps> = ({params}) => {
             <UserDropdown />
           </div>
           <ChatWindow
-            conversation_id={conversation_id}
+            conversation_id={conversationId}
             isDocument={false}
             project_id={project_id}
             content=""

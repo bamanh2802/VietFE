@@ -321,6 +321,8 @@ const chunksState = useSelector((state: RootState) => state.chunks);
   }, [])
   
   const handleGetChatHistory = async () => {
+    setIsRender(true)
+
     try {
       const data = await getChatHistory(conversation_id as string)
       dispatch(addChatHistory({ conversation_id, messages: data.data }));
@@ -328,6 +330,7 @@ const chunksState = useSelector((state: RootState) => state.chunks);
     } catch (e) {
       console.log(e)
     }
+    setIsRender(false)
   }
 
   useEffect(() => {

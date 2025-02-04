@@ -55,11 +55,10 @@ export async function refreshToken() {
 
   const response = await axios.post(
     `${API_URL}/api/auth/refresh`,
-    {}, // Body rỗng như lệnh curl
+    {},
     {
       headers: {
         'accept': "application/json",
-        'Authorization': `Bearer ${accessToken}`
       },
       withCredentials: true
     },

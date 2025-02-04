@@ -61,6 +61,7 @@ const ProjectPage: React.FC<ProjectPageProps> = ({ params }) => {
   const [notes, setNotes] = useState<Note[]>([]);
   const [selectedNote, setSelectedNote] = useState<string>("");
   const [note, setNote] = useState<Note>();
+  const [owner, setOwner] = useState<string>('')
   const [contextMenu, setContextMenu] = useState({
       show: false,
       x: 0,
@@ -126,6 +127,7 @@ const ProjectPage: React.FC<ProjectPageProps> = ({ params }) => {
   const handleGetNoteById = async (noteId: string) => {
     try {
       const data = await getNoteById(noteId);
+      setOwner(data.data?.user)
       setNote(data.data.note);
     } catch (e) {
       console.log(e);
@@ -193,16 +195,13 @@ const ProjectPage: React.FC<ProjectPageProps> = ({ params }) => {
         let data;
   
         if (id.startsWith("doc-")) {
-          console.log(`Deleting document with id ${id}`);
-          data = await deleteDocument(id, project_id as string);
+          deleteDocument(id, project_id as string);
           handleGetDocuments();
         } else if (id.startsWith("note-")) {
-          console.log(`Deleting note with id ${id}`);
-          data = await deleteNote(id);
+          deleteNote(id);
           handleGetNotes();
         } else if (id.startsWith("conv-")) {
-          console.log(`Deleting conversation with id ${id}`);
-          data = await deleteConversation(id);
+          deleteConversation(id);
           handleGetConversations();
         }
         toast({
@@ -341,6 +340,7 @@ const ProjectPage: React.FC<ProjectPageProps> = ({ params }) => {
           {!!selectedNote ? (
             <div className="w-full h-[calc(100vh-56px)] bg-[#ffffff] dark:bg-[#1f1f1f]">
               <RichTextEditor
+                owner={owner}
                 editNote={handleEditNote}
                 note={note as Note}
                 renameNote={handleRenameNote}
@@ -572,7 +572,7 @@ const ProjectPage: React.FC<ProjectPageProps> = ({ params }) => {
             </ModalHeader>
             <ModalBody>
               <p>
-                {p("DeleteDescription1")} <span className="font-bold">{selectedName}</span>
+                {p("DeleteDescription1")} <span className="font-bold w-full wrap">{selectedName} </span>
                 {p("DeleteDescription2")}
               </p>
             </ModalBody>
