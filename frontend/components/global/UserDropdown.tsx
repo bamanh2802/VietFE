@@ -1,11 +1,11 @@
 'use client'
 import React, { useEffect, useState } from "react";
-import {  Dropdown,  DropdownTrigger,  DropdownMenu,  DropdownSection,  DropdownItem} from "@nextui-org/dropdown";
+import { Dropdown, DropdownTrigger, DropdownMenu, DropdownSection, DropdownItem } from "@nextui-org/dropdown";
 import { useRouter } from "next/navigation";
-import {  Modal,  ModalContent,  ModalHeader,  ModalBody,  ModalFooter} from "@nextui-org/modal";
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@nextui-org/modal";
 import { useDispatch, useSelector } from "react-redux";
 import dynamic from "next/dynamic";
-import {Avatar} from "@nextui-org/avatar";
+import { Avatar } from "@nextui-org/avatar";
 import { Logout, getUser } from "@/service/apis";
 import { RootState } from "@/src/store/store";
 import { setUser, clearUser } from "@/src/store/userSlice";
@@ -17,7 +17,7 @@ import AccountSettings from "./UserProfile";
 
 const Feedback = dynamic(() => import("./Feedback"), {
   loading: () => <p>Loading...</p>,
-  ssr: false, 
+  ssr: false,
 });
 
 const UserDropdown = () => {
@@ -57,12 +57,12 @@ const UserDropdown = () => {
   const handleLogout = async () => {
     try {
       await Logout();
+      router.push("/");
       dispatch(clearUser())
       dispatch(clearProjects())
       dispatch(clearDocuments())
       dispatch(clearConversations())
       localStorage.removeItem("access_token");
-      router.push("/");
     } catch (e) {
       console.error("Error during logout:", e);
     }

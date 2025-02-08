@@ -103,5 +103,44 @@ export interface DocumentSearch {
 }
 
 export interface ChunksState {
-  [documentId: string]: Chunk[]; 
+  [documentId: string]: Chunk[];
+}
+
+
+export enum AppErrorCode {
+  // General
+  UNKNOWN_ERROR = 0,
+
+  // Database/Cache
+  CONNECTION_ERROR,
+  INVALID_QUERY_SYNTAX,
+  FOREIGN_KEY_CONSTRAINT,
+  DATABASE_TABLE_NOT_FOUND,
+
+  // User
+  USER_NOT_FOUND,
+  USER_ALREADY_EXISTS,
+  USER_PERMISSION_DENIED,
+
+  // Project
+  PROJECT_NOT_FOUND,
+
+  // Chunk
+  CHUNK_NOT_FOUND,
+
+  // Image
+  IMAGE_NOT_FOUND,
+
+  // Table
+  TABLE_NOT_FOUND,
+
+  // Document
+  DOCUMENT_NOT_FOUND,
+  DOCUMENT_SIZE_TOO_LARGE,
+
+  // Conversation
+  CONVERSATION_NOT_FOUND,
+
+  // Note
+  NOTE_NOT_FOUND
 }
