@@ -110,6 +110,9 @@ export interface ChunksState {
 export enum AppErrorCode {
   // General
   UNKNOWN_ERROR = 0,
+  INVALID_REFRESH_TOKEN,
+  EXPIRED_ACCESS_TOKEN,
+  INVALID_ACCESS_TOKEN,
 
   // Database/Cache
   CONNECTION_ERROR,

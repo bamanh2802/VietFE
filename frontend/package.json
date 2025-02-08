@@ -72,6 +72,7 @@
     "next": "^14.2.11",
     "next-i18next": "^15.4.1",
     "next-intl": "^3.26.3",
+    "next-pages-template": "file:",
     "next-themes": "^0.2.1",
     "pdfjs-dist": "3.4.120",
     "qs": "^6.13.0",

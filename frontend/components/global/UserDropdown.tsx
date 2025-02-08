@@ -56,8 +56,8 @@ const UserDropdown = () => {
 
   const handleLogout = async () => {
     try {
-      await Logout();
       router.push("/");
+      await Logout();
       dispatch(clearUser())
       dispatch(clearProjects())
       dispatch(clearDocuments())
