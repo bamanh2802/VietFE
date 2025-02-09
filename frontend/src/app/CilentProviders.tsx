@@ -23,7 +23,7 @@ function ThemeWrapper({ children }: { children: ReactNode }) {
   useEffect(() => {
     // Sync initial theme with system preference
     setTheme(isDarkMode ? "dark" : "light");
-  }, []);
+  }, [isDarkMode, setTheme]);
 
   // Expose theme handling function globally
   // @ts-ignore - Window type extension
@@ -32,7 +32,7 @@ function ThemeWrapper({ children }: { children: ReactNode }) {
     setTheme(isDarkMode ? "light" : "dark");
   };
 
-  return children;
+  return <>{children}</>; // Wrap children in a fragment to ensure valid JSX
 }
 
 export function ClientProviders({ children }: { children: ReactNode }) {
@@ -49,13 +49,13 @@ export function ClientProviders({ children }: { children: ReactNode }) {
     const isShareRoute = pathname.startsWith("/share/");
 
     if (isAuthenticated && isPublicRoute) {
-      // Nếu đã đăng nhập và đang ở public routes, chuyển về /home
+      // If logged in and on public routes, redirect to /home
       router.push("/home");
     } else if (!isAuthenticated && !isPublicRoute && !isShareRoute) {
-      // Nếu chưa đăng nhập và không ở public routes hoặc share routes
+      // If not logged in and not on public or share routes, redirect to /login
       router.push("/login");
     }
-    
+
     setIsLoading(false);
   }, [pathname, router]);
 
