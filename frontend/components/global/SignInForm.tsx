@@ -255,14 +255,14 @@ const SignInForm: React.FC<SignInFormProps> = ({ isOpen, closeForm}) => {
                 {t('Or sign in with')}
                 </div>
                 <div className="flex space-x-3 ">
-                  <Button startContent={<RiFacebookLine size={18}/>} className="flex-1 text-gray-500 dark:hover:text-white hover:text-black" color="default" variant="ghost">
+                  <Button disabled={true} startContent={<RiFacebookLine size={18}/>} className="flex-1 text-gray-500 dark:hover:text-white hover:text-black" color="default" variant="ghost">
                     
                     Facebook
                   </Button>
-                  <Button startContent={<RiGoogleLine size={18}/>} className="flex-1 text-gray-500 dark:hover:text-white hover:text-black" color="default" variant="ghost">
+                  <Button disabled={true} startContent={<RiGoogleLine size={18}/>} className="flex-1 text-gray-500 dark:hover:text-white hover:text-black" color="default" variant="ghost">
                     Google
                   </Button>
-                  <Button startContent={<RiMicrosoftLine size={18}/>} className="flex-1 text-gray-500 dark:hover:text-white hover:text-black" color="default" variant="ghost">
+                  <Button disabled={true} startContent={<RiMicrosoftLine size={18}/>} className="flex-1 text-gray-500 dark:hover:text-white hover:text-black" color="default" variant="ghost">
                     Microsoft
                   </Button>
                 </div>
@@ -392,13 +392,13 @@ const SignInForm: React.FC<SignInFormProps> = ({ isOpen, closeForm}) => {
                 {t('OrRegisterWith')}
               </div>
               <div className="flex space-x-3 ">
-                  <Button startContent={<RiFacebookLine size={18}/>} className="flex-1 text-gray-500 hover:text-white" color="default" variant="ghost">
+                  <Button disabled={true} startContent={<RiFacebookLine size={18}/>} className="flex-1 text-gray-500 hover:text-white" color="default" variant="ghost">
                     Facebook
                   </Button>
-                  <Button startContent={<RiGoogleLine size={18}/>} className="flex-1 text-gray-500 hover:text-white" color="default" variant="ghost">
+                  <Button disabled={true} startContent={<RiGoogleLine size={18}/>} className="flex-1 text-gray-500 hover:text-white" color="default" variant="ghost">
                     Google
                   </Button>
-                  <Button startContent={<RiMicrosoftLine size={18}/>} className="flex-1 text-gray-500 hover:text-white" color="default" variant="ghost">
+                  <Button disabled={true} startContent={<RiMicrosoftLine size={18}/>} className="flex-1 text-gray-500 hover:text-white" color="default" variant="ghost">
                     Microsoft
                   </Button>
                 </div>

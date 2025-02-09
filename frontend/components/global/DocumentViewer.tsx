@@ -1,134 +1,162 @@
-'use client'
-import { useEffect, useState } from "react";
-import { Tabs, Tab } from "@nextui-org/tabs";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Document, Chunk } from "@/src/types/types";
-import { getChunkDocument } from "@/service/documentApi";
-import PDFViewer from "@/components/global/PDFViewer";
-import { getDocumentUrl } from "@/service/documentApi";
-import { DocumentSkeleton } from "../project/document/DocumentSkeleton";
+"use client"
+
+import { useEffect, useState, useCallback } from "react"
+import { Tabs, Tab } from "@nextui-org/react"
+import type { Document, Chunk } from "@/src/types/types"
+import { getChunkDocument, getDocumentUrl } from "@/service/documentApi"
+import PDFViewer from "@/components/global/PDFViewer"
+import { DocumentSkeleton } from "../project/document/DocumentSkeleton"
+import { X } from "lucide-react"
 
 interface DocumentProps {
-  document: Document;
-  isOpen: boolean;
-  onClose: () => void;
+  document: Document
+  isOpen: boolean
+  onClose: () => void
 }
 
-const DocumentViewer: React.FC<DocumentProps> = ({
-  document,
-  isOpen,
-  onClose,
-}) => {
-  const [selectedTab, setSelectedTab] = useState<string>("raw");
-  const [url, setUrl] = useState<string>('')
-  const [chunks, setChunks] = useState<Chunk[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
+const DocumentViewer: React.FC<DocumentProps> = ({ document, isOpen, onClose }) => {
+  const [selectedTab, setSelectedTab] = useState<string>("raw")
+  const [url, setUrl] = useState<string>("")
+  const [chunks, setChunks] = useState<Chunk[]>([])
+  const [loading, setLoading] = useState<boolean>(false)
+  const [error, setError] = useState<string | null>(null)
 
-  const handleGetUrlDocument = async () => {
+  const handleGetUrlDocument = useCallback(async () => {
+    if (!document?.document_id) return
     try {
-      const data = await getDocumentUrl(document?.document_id)
+      const data = await getDocumentUrl(document.document_id)
       setUrl(data.data)
-    } catch (e){
-      console.log(e)
+    } catch (e) {
+      console.error("Error fetching document URL:", e)
+      setError("Failed to load document URL.")
+    }
+  }, [document?.document_id])
+
+  const handleGetChunkDocument = useCallback(async () => {
+    if (!document?.document_id) return
+    setLoading(true)
+    setError(null)
+
+    try {
+      const data = await getChunkDocument(document.document_id)
+      setChunks(data.data)
+    } catch (e) {
+      console.error("Error fetching document chunks:", e)
+      setError("Failed to load document chunks.")
+    } finally {
+      setLoading(false)
+    }
+  }, [document?.document_id])
+
+  useEffect(() => {
+    if (isOpen && document?.document_id) {
+      handleGetUrlDocument()
+      handleGetChunkDocument()
+    }
+
+    // Cleanup function
+    return () => {
+      if (!isOpen) {
+        setUrl("")
+        setChunks([])
+        setError(null)
+        setSelectedTab("raw")
+      }
+    }
+  }, [isOpen, document?.document_id, handleGetUrlDocument, handleGetChunkDocument])
+
+  const renderContent = () => {
+    switch (selectedTab) {
+      case "raw":
+        return (
+          <div className="h-full">
+            {url ? (
+              document?.type === "pdf" ? (
+                <PDFViewer fileUrl={url} fileType="pdf" isDocument={false} />
+              ) : ["doc", "docx"].includes(document?.type || "") ? (
+                <PDFViewer fileUrl={url} fileType="docx" isDocument={false} />
+              ) : (
+                <p className="text-center">Unsupported document type</p>
+              )
+            ) : (
+              <DocumentSkeleton />
+            )}
+          </div>
+        )
+      case "chunks":
+        return (
+          <div className="h-full overflow-auto">
+            <h3 className="text-lg font-semibold mb-4">Document Chunks</h3>
+            {chunks.length > 0 ? (
+              <ul className="space-y-4">
+                {chunks.map((chunk: Chunk, index: number) => (
+                  <li key={index} className="p-4 rounded-lg bg-gray-100 dark:bg-gray-800">
+                    <span className="font-medium text-blue-600 dark:text-blue-400">Chunk {index + 1}</span>
+                    <p className="mt-2">{chunk.content}</p>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-center text-gray-500">No chunks available for this document</p>
+            )}
+          </div>
+        )
+      case "image":
+        return (
+          <div className="h-full">
+            <h3 className="text-lg font-semibold mb-4">Document Image</h3>
+            <p className="text-center text-gray-500">Image preview not available</p>
+          </div>
+        )
+      default:
+        return null
     }
   }
 
-  const handleGetChunkDocument = async () => {
-    if (!document?.document_id) return; 
-    setLoading(true); 
-    setError(null); 
-
-    try {
-      const data = await getChunkDocument(document.document_id);
-      setChunks(data.data);
-    } catch (e) {
-      console.error(e);
-      setError("Failed to load document chunks."); 
-    } finally {
-      setLoading(false); 
-    }
-  };
-
-  useEffect(() => {
-    if(document && document?.document_id) {
-      handleGetChunkDocument();
-      handleGetUrlDocument()
-    }
-  }, [document?.document_id]);
+  if (!isOpen) return null
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="block w-5/6 max-w-6xl h-5/6 p-4 dark:bg-zinc-900 bg-zinc-50">
-        <DialogHeader>
-          <DialogTitle>{document?.document_name || "Document Viewer"}</DialogTitle>
-        </DialogHeader>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+      <div className="bg-white dark:bg-gray-800 w-11/12 max-w-6xl h-5/6 rounded-lg shadow-xl overflow-hidden">
+        <div className="flex flex-col h-full">
+          <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">
+            <h2 className="text-xl font-semibold">{document?.document_name || "Document Viewer"}</h2>
+            <button
+              onClick={onClose}
+              className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+            >
+              <X size={24} />
+            </button>
+          </div>
 
-        {loading && <p>Loading...</p>} {/* Thông báo tải */}
-        {error && <p className="text-red-500">{error}</p>} {/* Thông báo lỗi */}
+          <div className="flex-grow overflow-hidden p-4">
+            {loading && <p className="text-center">Loading...</p>}
+            {error && <p className="text-center text-red-500">{error}</p>}
 
-        <Tabs
-          aria-label="Document Tabs"
-          className="mt-4"
-          selectedKey={selectedTab}
-          variant="underlined"
-          onSelectionChange={(key) => setSelectedTab(key as string)}
-        >
-          <Tab key="raw" title="Raw">
-            <div className="p-4 h-full">
-              <div className="border-none h-full">
-              {
-                  document?.type === 'pdf' && url !== '' &&  (
-                    <PDFViewer fileUrl={url} fileType="pdf" isDocument={false}/> 
+            <Tabs
+              aria-label="Document viewing options"
+              selectedKey={selectedTab}
+              onSelectionChange={(key) => setSelectedTab(key as string)}
+              variant="underlined"
+              classNames={{
+                tabList: "gap-6 w-full relative rounded-none p-0 border-b border-gray-200 dark:border-gray-700",
+                cursor: "w-full bg-blue-500",
+                tab: "max-w-fit px-0 h-12",
+                tabContent: "group-data-[selected=true]:text-blue-500",
+              }}
+            >
+              <Tab key="raw" title="Raw View" />
+              <Tab key="chunks" title="Chunks View" />
+              <Tab key="image" title="Image View" />
+            </Tabs>
 
-                  )
-                }
-                {
-                  document?.type === 'doc' || document?.type === 'docx' && url !== '' && (
-                    <PDFViewer fileUrl={url} fileType="docx" isDocument={false}/> 
+            <div className="mt-4 h-[calc(100%-3rem)] overflow-auto">{renderContent()}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
 
-                  )
-                }
-                {
-                  (!!document || url === '') && (
-                    <DocumentSkeleton />
-                  )
-                }
-              </div>
-            </div>
-          </Tab>
-          <Tab key="chunks" title="Chunks" className="h-full">
-            <div className="p-4 h-[90%] overflow-auto">
-              <h3 className="text-lg font-semibold">Document Chunks</h3>
-              {chunks.length > 0 ? (
-                <ul>
-                  {chunks.map((chunk: Chunk, index: number) => (
-                    <li key={index} className="mb-2">
-                      <span className="font-bold">Chunk {index + 1}: </span>
-                      {chunk.content}
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p>No chunks available</p>
-              )}
-            </div>
-          </Tab>
-          <Tab key="image" title="Image">
-            <div className="p-4">
-              <h3 className="text-lg font-semibold">Document Image</h3>
-            
-            </div>
-          </Tab>
-        </Tabs>
-      </DialogContent>
-    </Dialog>
-  );
-};
+export default DocumentViewer
 
-export default DocumentViewer;

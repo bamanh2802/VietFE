@@ -87,18 +87,18 @@ const UserDropdown = () => {
           />
         </DropdownTrigger>
         <DropdownMenu aria-label="Profile Actions" variant="flat">
-          <DropdownItem key="profile" className="h-14 gap-2">
+          <DropdownItem textValue="profile" key="profile" className="h-14 gap-2">
             <p className="font-semibold">Signed in as</p>
             <p className="font-semibold">{user?.email}</p>
           </DropdownItem>
-          <DropdownItem key="settings" onPress={handleToggleSetting}>
+          <DropdownItem textValue="settings" key="settings" onPress={handleToggleSetting}>
             Settings
           </DropdownItem>
-          <DropdownItem key="analytics">Analytics</DropdownItem>
-          <DropdownItem key="help_and_feedback" onPress={handleOpenFeedback}>
+          <DropdownItem textValue="analytics" key="analytics">Analytics</DropdownItem>
+          <DropdownItem textValue="help_and_feedback" key="help_and_feedback" onPress={handleOpenFeedback}>
             Help & Feedback
           </DropdownItem>
-          <DropdownItem key="logout" color="danger" onPress={handleLogout}>
+          <DropdownItem textValue="logout" key="logout" color="danger" onPress={handleLogout}>
             Log Out
           </DropdownItem>
         </DropdownMenu>

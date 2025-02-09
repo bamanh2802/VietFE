@@ -126,23 +126,49 @@ const WorkSpace: React.FC<WorkSpaceProps> = ({params}) => {
   };
 
 
-  const handleSelectConversation = (conv: Conversation) => {
+  const handleSelectConversation = (convId: string) => {
     window.history.pushState(
       {}, 
       '', 
-      `/project/${project_id}/conversation/${conv.conversation_id}`
+      `/project/${project_id}/conversation/${convId}`
     );
-    setConversationId(conv.conversation_id)
-    setConversationName(conv.conversation_name);
+    setConversationId(convId)
   };
 
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-screen bg-black dark:invert-0 invert">
-        <Image alt="Loading..." height={300} src={PreLoader} width={300} />
+        <Image alt="Loading..." src={PreLoader} width={300} />
       </div>
     );
   }
+
+  const updatedConversations = (convId: string, newName: string) => {
+    setConversations(conversations.map(conv =>
+      conv.conversation_id === convId ? { ...conv, conversation_name: newName} : conv
+    ))
+  }
+
+
+  const updatedDeleteConversations = (convId: string) => {
+    setConversations(prevConversations => {
+      const updatedConversations = prevConversations.filter(conv => conv.conversation_id !== convId);
+  
+      if (conversationId === convId) {
+        const firstConv = updatedConversations[0]; 
+  
+        if (firstConv) {
+          handleSelectConversation(firstConv.conversation_id);
+        } else {
+          setConversationId(""); 
+        }
+      }
+  
+      return updatedConversations;
+    });
+  };
+  
+
 
   return (
     <div className="flex h-screen overflow-hidden">
@@ -150,9 +176,11 @@ const WorkSpace: React.FC<WorkSpaceProps> = ({params}) => {
         <title>{conversationName}</title>
       </Head>
       <SidebarWorkspace
+      updatedDeleteConversations={updatedDeleteConversations}
+      getConversation={handleGetConversation}
       consersationId={conversationId}
         conversations={conversations}
-        updatedConversations={handleGetConversation}
+        updatedConversations={updatedConversations}
         onSelectConversation={handleSelectConversation}
         projectId={project_id}
         params={params}
@@ -170,10 +198,10 @@ const WorkSpace: React.FC<WorkSpaceProps> = ({params}) => {
           <div className="z-20 absolute top-0 w-full h-11 bg-zinc-100 dark:bg-zinc-800" />
           <div className="absolute top-4 left-5 z-40">
             <Breadcrumbs>
-              <BreadcrumbItem onClick={handleBackHome}>
+              <BreadcrumbItem onPress={handleBackHome}>
                 <HomeIcon className="w-4 h-4" />
               </BreadcrumbItem>
-              <BreadcrumbItem onClick={() => handleRouterToProject(projectInfo as Project)}>
+              <BreadcrumbItem onPress={() => handleRouterToProject(projectInfo as Project)}>
                 {projectInfo?.name}
               </BreadcrumbItem>
               <BreadcrumbItem>{conversationName}</BreadcrumbItem>
@@ -242,7 +270,7 @@ const WorkSpace: React.FC<WorkSpaceProps> = ({params}) => {
                 isButton && (
                   <Button
                     variant="light"
-                    onClick={toggleFileViewer}
+                    onPress={toggleFileViewer}
                     className="absolute top-4 right-4 z-50"
                     isIconOnly
                   >
