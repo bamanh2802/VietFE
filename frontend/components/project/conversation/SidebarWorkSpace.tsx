@@ -185,7 +185,7 @@ const SidebarWorkspace: FC<SidebarWorkspaceProps> = ({
   };
 
   const handleContextMenu = (
-    e: React.MouseEvent<HTMLDivElement>,
+    e: React.MouseEvent,
     conversationId: string,
     conversationName: string,
   ) => {
@@ -195,6 +195,8 @@ const SidebarWorkspace: FC<SidebarWorkspaceProps> = ({
     setSelectedConversationId(conversationId);
     setContextMenu({ x: e.clientX, y: e.clientY, id: conversationId });
   };
+
+
 
   const handleOpenRename = () => {
     setNewName(selectedConversationName);
@@ -230,7 +232,7 @@ const SidebarWorkspace: FC<SidebarWorkspaceProps> = ({
               key={conv.conversation_id}
               className={`relative transition-all group flex justify-between items-center space-x-2 text-sm cursor-pointer p-2 rounded-lg ${
                 isSelected
-                  ? "bg-zinc-300 dark:bg-zinc-700 text-white" // Highlight selected conversation
+                  ? "bg-zinc-300 dark:bg-zinc-700" // Highlight selected conversation
                   : "text-gray-700 dark:text-gray-400 hover:bg-zinc-200 dark:hover:bg-zinc-800"
               }`}
               onClick={() => onSelectConversation(conv.conversation_id)}
@@ -257,20 +259,26 @@ const SidebarWorkspace: FC<SidebarWorkspaceProps> = ({
                   }
                 />
               ) : (
-                <span>{conv.conversation_name}</span>
+                <span className="w-full truncate">{conv.conversation_name}</span>
               )}
-              <div
-                className="opacity-0 group-hover:opacity-100"
+              
+              {!isCompactSidebar && (
+                <div
+                className="opacity-0 group-hover:opacity-100 pointer-events-auto"
                 onClick={(e) =>
-                  handleContextMenu(
-                    e,
-                    conv.conversation_id,
-                    conv.conversation_name,
-                  )
+                  {
+                    e.stopPropagation();
+                    handleContextMenu(
+                      e,
+                      conv.conversation_id,
+                      conv.conversation_name,
+                    )
+                  }
                 }
               >
-                <EllipsisHorizontalIcon className="h-4 w-4 text-gray-400" />
+                <EllipsisHorizontalIcon className="h-4 w-4 text-black dark:text-gray-400" />
               </div>
+              )}
             </div>
           );
         })}
@@ -288,21 +296,21 @@ const SidebarWorkspace: FC<SidebarWorkspaceProps> = ({
     return () => {
       document.removeEventListener("click", handleClickOutside);
     };
-  }, []);
+  }, [contextMenu]);
 
   return (
     <div
       className={`${isCompactSidebar ? "w-14 p-1" : "w-60 p-4"} transition-all h-screen dark:bg-zinc-900 bg-zinc-50 flex flex-col`}
     >
-      <div className="flex justify-between items-center">
+      <div className={`flex ${isCompactSidebar ? ' justify-center' : ' justify-between'} items-center`}>
         <Button
           isIconOnly
           onPress={() => setIsCompactSidebar(!isCompactSidebar)}
         >
-          <ChevronLeftIcon className="w-4 h-4" />
+          <ChevronLeftIcon className={`transition-all w-4 h-4 ${isCompactSidebar ? 'rotate-180' : ''}`} />
         </Button>
         {!isCompactSidebar && (
-          <Button isIconOnly onClick={() => handleToggleNewConversation()}>
+          <Button isIconOnly onPress={() => handleToggleNewConversation()}>
             <PlusIcon className="w-4 h-4" />
           </Button>
         )}
@@ -314,8 +322,8 @@ const SidebarWorkspace: FC<SidebarWorkspaceProps> = ({
             className="flex dark:text-gray-400 text-gray-700 transition-all p-3 rounded-lg cursor-pointer my-2 hover:bg-zinc-200 dark:hover:bg-zinc-800"
             onClick={() => handleBackHome()}
           >
-            <div className={`flex items-center ${isCompactSidebar ? '' : 'space-x-3'}`}>
-              <HomeIcon className="h-4 w-4 text-gray-300" />
+            <div className={`flex items-center ${isCompactSidebar ? ' w-full flex items-center justify-center' : 'space-x-3'}`}>
+              <HomeIcon className="h-4 w-4 text-black dark:text-gray-300" />
               {!isCompactSidebar && (
                 <span className="text-xs">Home</span>
               )}
@@ -338,7 +346,7 @@ const SidebarWorkspace: FC<SidebarWorkspaceProps> = ({
           {!isCompactSidebar ? g('Search') : ''}
 
         </Button>
-        <h3 className="mt-5 flex items-center justify-between text-sm font-semibold dark:text-gray-400 text-gray-700 transition-all rounded-lg px-2 p-1 cursor-pointer hover:bg-zinc-200 dark:hover:bg-zinc-800">
+        <h3 className="mt-5 w-full flex items-center justify-center text-sm font-semibold dark:text-gray-400 text-gray-700 transition-all rounded-lg px-2 p-1 cursor-pointer hover:bg-zinc-200 dark:hover:bg-zinc-800">
           <span>
           {!isCompactSidebar ? g('Conversations') : <ChatBubbleLeftIcon className="w-4 h-4" />}
           </span>
