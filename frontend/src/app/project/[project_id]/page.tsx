@@ -261,7 +261,6 @@ const ProjectPage: React.FC<ProjectPageProps> = ({ params }) => {
 
   const handleContextMenu = (e: React.MouseEvent, id: string, name: string) => {
       e.preventDefault();
-      console.log(e)
       const menuWidth = 200; 
       const menuHeight = 200; 
       const { innerWidth, innerHeight } = window;

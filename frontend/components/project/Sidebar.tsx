@@ -588,7 +588,9 @@ const Sidebar: React.FC<SidebarProps> = ({
             </div>
             <div className="flex items-center">
               <Tooltip content="New">
-                <PlusIcon className="mr-2 w-4 h-4 opacity-0 group-hover:opacity-100 transition-all" />
+                <PlusIcon 
+                  onClick={handleCreateNewNote}
+                className="mr-2 w-4 h-4 opacity-0 group-hover:opacity-100 transition-all" />
               </Tooltip>
               <ChevronDownIcon
                 className={`w-4 h-4 transform transition-transform duration-300 ${expandedSections.includes("note") ? "rotate-180" : ""}`}

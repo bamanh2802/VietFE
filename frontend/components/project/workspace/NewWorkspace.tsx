@@ -98,17 +98,15 @@ const NewWorkspace: FC<NewWorkspaceProps> = ({
 
   useEffect(() => {
     if (documents !== undefined) {
-      if (
-        documents.length !== 0 &&
-        Array.from(selectedKeys).length !== 0 &&
-        conversationName !== ""
-      ) {
+      const hasValidKeys = Array.from(selectedKeys).some((key) => key !== "");
+      if (documents.length !== 0 && hasValidKeys && conversationName !== "") {
         setIsDisable(false);
       } else {
         setIsDisable(true);
       }
     }
   }, [documents, conversationName, selectedKeys]);
+  
 
   const selectedValue = React.useMemo(
     () =>

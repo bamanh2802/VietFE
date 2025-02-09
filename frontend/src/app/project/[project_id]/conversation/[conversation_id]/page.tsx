@@ -160,13 +160,15 @@ const WorkSpace: React.FC<WorkSpaceProps> = ({params}) => {
         if (firstConv) {
           handleSelectConversation(firstConv.conversation_id);
         } else {
-          setConversationId(""); 
+          setConversationId("");
+          router.push(`/project/${project_id}`);
         }
       }
   
       return updatedConversations;
     });
   };
+  
   
 
 

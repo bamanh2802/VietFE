@@ -11,6 +11,12 @@ import { fontSans, fontMono } from "@/config/fonts";
 import useDarkMode from "@/src/hook/useDarkMode";
 import { useTheme } from "next-themes";
 
+declare global {
+  interface Window {
+    handleTheme: () => void;
+  }
+}
+
 export const fonts = {
   sans: fontSans.style.fontFamily,
   mono: fontMono.style.fontFamily,
@@ -19,52 +25,78 @@ export const fonts = {
 function ThemeWrapper({ children }: { children: ReactNode }) {
   const { theme, setTheme } = useTheme();
   const [isDarkMode, toggleDarkMode] = useDarkMode();
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    // Sync initial theme with system preference
-    setTheme(isDarkMode ? "dark" : "light");
-  }, [isDarkMode, setTheme]);
+    setMounted(true);
 
-  // Expose theme handling function globally
-  // @ts-ignore - Window type extension
-  window.handleTheme = () => {
-    toggleDarkMode();
-    setTheme(isDarkMode ? "light" : "dark");
-  };
+    if (typeof window !== "undefined") {
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      const savedTheme = localStorage.getItem("theme") || (prefersDark ? "dark" : "light");
+      
+      setTheme(savedTheme);
+      if (savedTheme === "light" && isDarkMode) {
+        toggleDarkMode();
+      }
+      
+      localStorage.setItem("theme", savedTheme);
 
-  return <>{children}</>; // Wrap children in a fragment to ensure valid JSX
+      window.handleTheme = () => {
+        const newTheme = theme === "light" ? "dark" : "light";
+        toggleDarkMode();
+        setTheme(newTheme);
+        localStorage.setItem("theme", newTheme);
+      };
+    }
+  }, []);
+
+  if (!mounted) return null;
+
+  return <>{children}</>;
 }
 
 export function ClientProviders({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState(true);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem("access_token");
-    const isAuthenticated = !!token;
+    setMounted(true);
+  }, []);
 
-    const publicRoutes = ["/", "/login"];
-    const isPublicRoute = publicRoutes.includes(pathname);
-    const isShareRoute = pathname.startsWith("/share/");
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const token = localStorage.getItem("access_token");
+      const isAuthenticated = !!token;
 
-    if (isAuthenticated && isPublicRoute) {
-      // If logged in and on public routes, redirect to /home
-      router.push("/home");
-    } else if (!isAuthenticated && !isPublicRoute && !isShareRoute) {
-      // If not logged in and not on public or share routes, redirect to /login
-      router.push("/login");
+      const publicRoutes = ["/", "/login"];
+      const isPublicRoute = publicRoutes.includes(pathname);
+      const isShareRoute = pathname.startsWith("/share/");
+
+      if (isAuthenticated && isPublicRoute) {
+        router.replace("/home");
+      } else if (!isAuthenticated && !isPublicRoute && !isShareRoute) {
+        router.replace("/login");
+      }
+
+      setIsLoading(false);
     }
-
-    setIsLoading(false);
   }, [pathname, router]);
+
+  if (!mounted) return null;
 
   if (isLoading) {
     return (
       <Provider store={store}>
         <NextUIProvider>
-          <NextThemesProvider attribute="class" defaultTheme="system" enableSystem>
-            {/* You could add a loading spinner here if desired */}
+          <NextThemesProvider 
+            attribute="class" 
+            defaultTheme="light" 
+            enableSystem
+            disableTransitionOnChange
+          >
+            {/* Loading state */}
           </NextThemesProvider>
         </NextUIProvider>
       </Provider>
@@ -74,7 +106,12 @@ export function ClientProviders({ children }: { children: ReactNode }) {
   return (
     <Provider store={store}>
       <NextUIProvider navigate={router.push}>
-        <NextThemesProvider attribute="class" defaultTheme="system" enableSystem>
+        <NextThemesProvider 
+          attribute="class" 
+          defaultTheme="light" 
+          enableSystem
+          disableTransitionOnChange
+        >
           <ThemeWrapper>
             {children}
             <Toaster />
