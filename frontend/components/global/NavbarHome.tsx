@@ -15,7 +15,6 @@ import { Loader2 } from 'lucide-react';
 import UserDropdown from "./UserDropdown";
 import { createProject } from "@/service/apis";
 import { User } from "@/src/types/types";
-
 interface NavbarHomeProps {
   user: User;
   updatedProject: () => void;
@@ -49,6 +48,7 @@ const NavbarHome: React.FC<NavbarHomeProps> = ({ user, updatedProject }) => {
     }
   };
 
+
   return (
     <Navbar
       isBordered
@@ -61,11 +61,12 @@ const NavbarHome: React.FC<NavbarHomeProps> = ({ user, updatedProject }) => {
       </NavbarContent>
 
       <NavbarContent as="div" className="items-center" justify="end">
+        
         <NavbarItem>
           <Button
             className="dark:bg-zinc-900 bg-zinc-50"
             variant="ghost"
-            onClick={handleToggleNewProject}
+            onPress={handleToggleNewProject}
           >
             <PlusIcon className="w-5 h-5" />
             {t('NewProject')}

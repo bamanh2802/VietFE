@@ -53,7 +53,7 @@ const NewDocument: FC<NewDocumentProps> = ({
   const progress = ((limit + selectedFiles.length) / maxFiles) * 100;
   const userId = localStorage.getItem("user_id")
   const ws_url = API_URL.replace(/^http(s?):/, (match) => match === 'https:' ? 'wss:' : 'ws:');
-
+  const ws = `${ws_url}/ws/notification/files-upload?user_id=${userId}`
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
 
@@ -155,11 +155,10 @@ const NewDocument: FC<NewDocumentProps> = ({
   useEffect(() => {
     // Initial WebSocket test on component mount
     const testInitialConnection = () => {
-      wsRef.current = new WebSocket(`${ws_url}/ws/notification/files-upload?user_id=${userId}`);
+      wsRef.current = new WebSocket(ws);
 
       timeoutRef.current = setTimeout(() => {
         if (!hasDataRef.current) {
-          console.log('No data received in 10 seconds, closing connection');
           closeWebSocket();
         }
         setIsTesting(false);
@@ -211,7 +210,7 @@ const NewDocument: FC<NewDocumentProps> = ({
     }
 
     if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) {
-      wsRef.current = new WebSocket(`${ws_url}/ws/notification/files-upload?user_id=${userId}`);
+      wsRef.current = new WebSocket(ws);
       wsRef.current.onopen = () => {
         setIsConnected(true);
         console.log('Upload WebSocket Connected');
@@ -277,7 +276,7 @@ const NewDocument: FC<NewDocumentProps> = ({
                 {details.progress} %
               </Chip>
             </div>
-            <Progress aria-label="file progress" className="max-w-md mt-2" size="sm" value={details.progress} />
+            <Progress isIndeterminate aria-label="file progress" className="max-w-md mt-2" size="sm"/>
           </CardBody>
         </Card>
       ));

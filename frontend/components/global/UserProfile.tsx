@@ -341,9 +341,8 @@ function SecurityPage({
     setIsLoadingPassword(true);
 
     try {
-      const data = await changePassword(currentPassword, newPassword);
+       await changePassword(currentPassword, newPassword);
 
-      console.log(data);
       toast({
         title: "Change password successfully!",
         description: "Waiting for data loading",
@@ -355,7 +354,6 @@ function SecurityPage({
         description: "Something went wrong",
       });
     }
-    console.log("Saving new password");
     setIsChangingPassword(false);
     setCurrentPassword("");
     setNewPassword("");

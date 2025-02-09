@@ -14,13 +14,12 @@ import {
   LinkIcon,
   NewspaperIcon,
 } from "@heroicons/react/24/outline";
-
+import { useToast } from "@/hooks/use-toast";
 import { Document } from "@/src/types/types";
-import { getAllConversationByUser } from "@/service/apis";
-import { setConversations } from "@/src/store/conversationSlice";
 import { createNewConversation } from "@/service/projectApi";
-
+import { redirect } from 'next/navigation'
 interface NewWorkspaceProps {
+  onSelectConversation: (convId: string) => void;
   isOpen: boolean;
   onClose: () => void;
   documents: Document[];
@@ -30,6 +29,7 @@ interface NewWorkspaceProps {
 }
 
 const NewWorkspace: FC<NewWorkspaceProps> = ({
+  onSelectConversation,
   from,
   updateConversation,
   projectId,
@@ -38,6 +38,7 @@ const NewWorkspace: FC<NewWorkspaceProps> = ({
   documents,
 }) => {
   const router = useRouter();
+  const { toast } = useToast()
   const dispatch = useDispatch();
   const [selectedKeys, setSelectedKeys] = React.useState(new Set([""]));
   const [conversationName, setConversationName] = useState<string>("");
@@ -50,22 +51,40 @@ const NewWorkspace: FC<NewWorkspaceProps> = ({
 
   const handleCreateNewConversation = async () => {
     const selectedDocsArray = Array.from(selectedKeys).filter(key => key !== '');
+  
     setIsLoading(true);
+  
     try {
       const data = await createNewConversation(
-        conversationName,
+        conversationName.trim(),
         projectId,
-        selectedDocsArray,
+        selectedDocsArray
       );
-
-      setIsLoading(false);
+  
+      toast({
+        title: "Conversation created successfully",
+        description: "Redirecting to the new conversation...",
+      });
+  
       handleRouterWorkspace(data.data.conversation_id);
-    } catch (e) {
-      console.log(e);
+  
+      setSelectedKeys(new Set());
+      setConversationName("");
+      onClose();
+  
+    } catch (e: any) {
+      console.error("Error creating conversation:", e);
+  
+      toast({
+        variant: "destructive",
+        title: "Failed to create conversation",
+        description: e?.response?.data?.message || e?.message || "Something went wrong.",
+      });
+    } finally {
       setIsLoading(false);
     }
-    onClose();
   };
+  
 
   const handleRouterWorkspace = (conversationId: string) => {
     updateConversation();
@@ -73,7 +92,7 @@ const NewWorkspace: FC<NewWorkspaceProps> = ({
       const url = `/project/${projectId}/conversation/${conversationId}`;
       window.open(url, "_blank");
     } else if (from === "conversation") {
-      router.push(`/project/${projectId}/conversation/${conversationId}`);
+      onSelectConversation(conversationId)
     }
   };
 

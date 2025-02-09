@@ -151,7 +151,7 @@ const ChatWindow: FC<ChatWindowProps> = ({
   const [loading, setLoading] = useState<boolean>(false);
   const [waitForGetChunksApi, setWaitForGetChunksApi] = useState<boolean>(true)
   const [waitForChatHistory, setWaitForChatHistory] = useState<boolean>(true)
-  const [isRender, setIsRender] = useState<boolean>(false)
+  const [isRender, setIsRender] = useState<boolean>(true)
   const socket = useRef<WebSocket | null>(null);
   const chatWindowRef = useRef<HTMLDivElement | null>(null);
   const [selectedText, setSelectedText] = useState<string | null>(null);
@@ -246,7 +246,6 @@ const chunksState = useSelector((state: RootState) => state.chunks);
 
   useEffect(() => {
     if (chunksState && conversationExists && !waitForGetChunksApi && !waitForChatHistory) {
-      setIsRender(true)
     }
   }, [chunksState, conversationExists, waitForGetChunksApi, waitForChatHistory])
 
@@ -258,6 +257,8 @@ const chunksState = useSelector((state: RootState) => state.chunks);
         isLoading: false,
       },
   );
+
+
 
   const handleGetDocumentByConversation = async () => {
     try {
@@ -321,7 +322,6 @@ const chunksState = useSelector((state: RootState) => state.chunks);
   }, [])
   
   const handleGetChatHistory = async () => {
-    setIsRender(true)
 
     try {
       const data = await getChatHistory(conversation_id as string)
@@ -330,7 +330,6 @@ const chunksState = useSelector((state: RootState) => state.chunks);
     } catch (e) {
       console.log(e)
     }
-    setIsRender(false)
   }
 
   useEffect(() => {
@@ -371,41 +370,65 @@ const chunksState = useSelector((state: RootState) => state.chunks);
 
       socket.current.onmessage = (event: MessageEvent) => {
         const response = event.data;
-        if (
-          response !== "<END_OF_CONTEXT>" &&
-          !response.includes("chunk_id") &&
-          response !== "<END_OF_RESPONSE>" &&
-          !response.includes("{\"context\":null}") &&
-          !response.includes("{\"context\":[]}")
-        ) {
-        dispatch(
-            updateServerMessage({ conversation_id, content: event.data }),
-          );
-        } else if (response.includes("chunk_id") ) {
-          const chunk_ids = JSON.parse(response);
-          const currentChunkIds = chunk_ids.context.map((chunk_id: string) =>
-            JSON.parse(chunk_id),
-          );
-
-          dispatch(
-            finalizeServerMessage({
-              conversation_id,
-              chunk_ids: currentChunkIds,
-            }),
-          );
-          setTimeout(() => {
+        console.log("WebSocket received:", response);
+      
+        try {
+          if (
+            response !== "<END_OF_CONTEXT>" &&
+            response !== "<END_OF_RESPONSE>" &&
+            !response.includes("chunk_id") &&
+            !response.includes("{\"context\":null}") &&
+            !response.includes("{\"context\":[]}")
+          ) {
+            dispatch(
+              updateServerMessage({ conversation_id, content: event.data }),
+            );
+          } 
+          else if (response.includes("chunk_id")) {
+            const chunk_ids = JSON.parse(response);
+            const currentChunkIds = chunk_ids.context.map((chunk_id: string) =>
+              JSON.parse(chunk_id),
+            );
+      
+            dispatch(
+              finalizeServerMessage({
+                conversation_id,
+                chunk_ids: currentChunkIds,
+              }),
+            );
             setLoading(false);
-          }, 1000);
-        } else if (response.includes("{\"context\":null}") 
-          && response.includes("{\"context\":[]}")
-        ) {
+          } 
+          // Case 3: Empty context
+          else if (
+            response.includes("{\"context\":null}") ||
+            response.includes("{\"context\":[]}")
+          ) {
+            dispatch(
+              finalizeServerMessage({
+                conversation_id,
+                chunk_ids: [],
+              }),
+            );
+            setLoading(false);
+          }
+          else if (response === "<END_OF_RESPONSE>" || response === "<END_OF_CONTEXT>") {
+            dispatch(
+              finalizeServerMessage({
+                conversation_id,
+                chunk_ids: [],
+              }),
+            );
+            setLoading(false);
+          }
+        } catch (error) {
+          console.error("Error processing WebSocket message:", error);
+          // Ensure message is finalized even on error
           dispatch(
             finalizeServerMessage({
               conversation_id,
               chunk_ids: [],
             }),
           );
-        } else {
           setLoading(false);
         }
       };
@@ -1142,13 +1165,13 @@ const chunksState = useSelector((state: RootState) => state.chunks);
         </div>
 
         {!isDocument && !isDocumentViewerOpen && (
-          <div className="fixed bottom-9 right-9 z-5">
+          <div className="fixed bottom-16 right-9 z-5">
             <Tooltip content="Document Pool!">
               <Button
                 isIconOnly
                 className="rounded-full"
                 size="lg"
-                onClick={() => handleToggleSource()}
+                onPress={() => handleToggleSource()}
               >
                 <FolderIcon className="w-4 h-4" />
               </Button>
@@ -1204,7 +1227,7 @@ const chunksState = useSelector((state: RootState) => state.chunks);
         >
           <Button
             isIconOnly
-            onClick={toggleMessage}
+            onPress={toggleMessage}
             className="bg-gray-300 rounded-full shadow hover:bg-gray-400"
           >
             {!isMessage ? (

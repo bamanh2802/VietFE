@@ -8,11 +8,32 @@ import { Toaster } from "@/components/ui/toaster";
 import { ReactNode, useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { fontSans, fontMono } from "@/config/fonts";
+import useDarkMode from "@/src/hook/useDarkMode";
+import { useTheme } from "next-themes";
 
 export const fonts = {
   sans: fontSans.style.fontFamily,
   mono: fontMono.style.fontFamily,
 };
+
+function ThemeWrapper({ children }: { children: ReactNode }) {
+  const { theme, setTheme } = useTheme();
+  const [isDarkMode, toggleDarkMode] = useDarkMode();
+
+  useEffect(() => {
+    // Sync initial theme with system preference
+    setTheme(isDarkMode ? "dark" : "light");
+  }, []);
+
+  // Expose theme handling function globally
+  // @ts-ignore - Window type extension
+  window.handleTheme = () => {
+    toggleDarkMode();
+    setTheme(isDarkMode ? "light" : "dark");
+  };
+
+  return children;
+}
 
 export function ClientProviders({ children }: { children: ReactNode }) {
   const router = useRouter();
@@ -27,7 +48,11 @@ export function ClientProviders({ children }: { children: ReactNode }) {
     const isPublicRoute = publicRoutes.includes(pathname);
     const isShareRoute = pathname.startsWith("/share/");
 
-    if (!isAuthenticated && !isPublicRoute && !isShareRoute) {
+    if (isAuthenticated && isPublicRoute) {
+      // Nếu đã đăng nhập và đang ở public routes, chuyển về /home
+      router.push("/home");
+    } else if (!isAuthenticated && !isPublicRoute && !isShareRoute) {
+      // Nếu chưa đăng nhập và không ở public routes hoặc share routes
       router.push("/login");
     }
     
@@ -38,7 +63,7 @@ export function ClientProviders({ children }: { children: ReactNode }) {
     return (
       <Provider store={store}>
         <NextUIProvider>
-          <NextThemesProvider attribute="class" defaultTheme="dark">
+          <NextThemesProvider attribute="class" defaultTheme="system" enableSystem>
             {/* You could add a loading spinner here if desired */}
           </NextThemesProvider>
         </NextUIProvider>
@@ -49,9 +74,11 @@ export function ClientProviders({ children }: { children: ReactNode }) {
   return (
     <Provider store={store}>
       <NextUIProvider navigate={router.push}>
-        <NextThemesProvider attribute="class" defaultTheme="dark">
-          {children}
-          <Toaster />
+        <NextThemesProvider attribute="class" defaultTheme="system" enableSystem>
+          <ThemeWrapper>
+            {children}
+            <Toaster />
+          </ThemeWrapper>
         </NextThemesProvider>
       </NextUIProvider>
     </Provider>

@@ -62,6 +62,7 @@ const ProjectPage: React.FC<ProjectPageProps> = ({ params }) => {
   const [selectedNote, setSelectedNote] = useState<string>("");
   const [note, setNote] = useState<Note>();
   const [owner, setOwner] = useState<string>('')
+  const [renameDocId, setRenameDocId] = useState("");
   const [contextMenu, setContextMenu] = useState({
       show: false,
       x: 0,
@@ -72,6 +73,7 @@ const ProjectPage: React.FC<ProjectPageProps> = ({ params }) => {
   const [selectedName, setSelectedName] = useState<string>("");
   const p = useTranslations('Project');
   const g = useTranslations('Global');
+  const [loadingCreateNote, setLoadingCreateNote] = useState<boolean>(false)
   
   const openDialog = () => {
     setIsDialogOpen(true);
@@ -92,6 +94,9 @@ const ProjectPage: React.FC<ProjectPageProps> = ({ params }) => {
     setIsOpenNewDocument(true);
   };
 
+    const handleCreateNoteLoading = () => {
+      setLoadingCreateNote(true)
+    }
 
   useEffect(() => {
     if(noteIdParam !== undefined && noteIdParam !== selectedNote && noteIdParam !== null) {
@@ -107,6 +112,10 @@ const ProjectPage: React.FC<ProjectPageProps> = ({ params }) => {
     }
   };
 
+  const setRenameId = (renameId: string) => {
+    setRenameDocId(renameId)
+  }
+
   const handleRenameNote = async (noteId: string, newName: string) => {
     try {
       await renameNote(noteId, newName);
@@ -115,6 +124,10 @@ const ProjectPage: React.FC<ProjectPageProps> = ({ params }) => {
     } catch (e) {
       console.log(e);
     }
+  };
+  const handleOpenRename = (docId: string) => {
+    handleCloseContext()
+    setRenameDocId(docId);
   };
   const handleEditNote = async (noteId: string, content: string, formatted_text: string) => {
     try {
@@ -164,7 +177,7 @@ const ProjectPage: React.FC<ProjectPageProps> = ({ params }) => {
   const handleGetConversations = async () => {
     try {
       const data = await getConversationInProject(project_id as string);
-
+      console.log(data)
       setConversations(data.data);
     } catch (e) {
       console.log(e);
@@ -189,37 +202,58 @@ const ProjectPage: React.FC<ProjectPageProps> = ({ params }) => {
   };
 
   const handleDelete = async (id: string) => {
-      handleCloseContext()
-      setIsLoadingDelete(true);
-      try {
-        let data;
+    handleCloseContext();
+    setIsLoadingDelete(true);
+    
+    try {
+      if (!id) throw new Error("Invalid ID");
   
-        if (id.startsWith("doc-")) {
-          deleteDocument(id, project_id as string);
-          handleGetDocuments();
-        } else if (id.startsWith("note-")) {
-          deleteNote(id);
-          handleGetNotes();
-        } else if (id.startsWith("conv-")) {
-          deleteConversation(id);
-          handleGetConversations();
-        }
-        toast({
-          title: "Delete successfully",
-          description: "Waiting for data loading",
-        });
-      } catch (e) {
-        console.log("Error during deletion:", e);
-        toast({
-          variant: "destructive",
-          title: "Delete failed!",
-          description: "Something went wrong!",
-        });
-      } finally {
-        setIsLoadingDelete(false);
-        handleOpenDeleteDocument();
+      let response;
+  
+      if (id.startsWith("doc-")) {
+        response = await deleteDocument(id, project_id as string);
+        updatedDeleteDocuments(id)
+      } else if (id.startsWith("note-")) {
+        response = await deleteNote(id);
+        updatedDeleteNotes(id)
+      } else if (id.startsWith("conv-")) {
+        response = await deleteConversation(id);
+        updatedDeleteConversations(id)
+      } else {
+        throw new Error("Invalid ID format");
       }
-    };
+  
+      if (response.status >= 400) {
+        throw new Error(`Delete failed with status: ${response.status}`);
+      }
+  
+      toast({
+        title: "Delete successfully",
+        description: "Waiting for data loading",
+      });
+    } catch (e: any) {
+      console.error("Error during deletion:", e);
+  
+      let errorMessage = "Something went wrong!";
+      if (e.response) {
+        const { status, data } = e.response;
+        errorMessage = `Error ${status}: ${data?.message || "Unknown error"}`;
+      } else if (e.message) {
+        errorMessage = e.message;
+      }
+  
+      toast({
+        variant: "destructive",
+        title: "Delete failed!",
+        description: errorMessage,
+      });
+    } finally {
+      setIsLoadingDelete(false);
+      handleOpenDeleteDocument();
+    }
+  };
+  
+  
 
   const handleCloseContext = () => {
     setContextMenu({ ...contextMenu, show: false });
@@ -274,16 +308,31 @@ const ProjectPage: React.FC<ProjectPageProps> = ({ params }) => {
     };
   }, [contextMenu]);
   const handleCreateNewNote = async () => {
+    setLoadingCreateNote(true);
     try {
       const data = await createNewNote(project_id as string);
+  
+      if (!data?.data?.note_id) {
+        throw new Error("Invalid response from server");
+      }
+  
       handleSetSelectedNote(data.data.note_id);
-      handleGetNotes();
+      await handleGetNotes(); 
+  
       toast({
-        title: "New note created successfully",
-        description: "Waiting for data loading",
+        title: "Success",
+        description: "New note created successfully.",
       });
-    } catch (e) {
-      console.log(e);
+    } catch (error) {
+      console.error("Error creating new note:", error);
+  
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to create note.",
+        variant: "destructive", 
+      });
+    } finally {
+      setLoadingCreateNote(false);
     }
   };
 
@@ -297,6 +346,38 @@ const ProjectPage: React.FC<ProjectPageProps> = ({ params }) => {
   }
 
 
+  const updatedDocuments = (docId: string, newName: string) => {
+    setDocuments(documents.map(doc =>
+      doc.document_id === docId ? { ...doc, document_name: newName } : doc
+    ))
+  };
+  
+  const updatedConversations = (convId: string, newName: string) => {
+    setConversations(conversations.map(conv =>
+      conv.conversation_id === convId ? { ...conv, conversation_name: newName} : conv
+    ))
+  }
+
+  const updatedNotes = (noteId: string, newName: string) => {
+    setNotes(notes.map(note => 
+      note.note_id === noteId ? { ...note, title : newName } : note
+    ))
+  }
+
+  const updatedDeleteDocuments = (docId: string) => {
+    setDocuments(prevDocuments => prevDocuments.filter(doc => doc.document_id !== docId));
+  };
+
+  const updatedDeleteConversations = (convId: string) => {
+    setConversations(prevConversations => prevConversations.filter(conv => conv.conversation_id !== convId))
+  }
+
+  const updatedDeleteNotes = (noteId: string) => {
+    setNotes(prevNotes => prevNotes.filter(note => note.note_id !== noteId))
+  }
+
+  
+
   return (
     <div className="flex box-border">
       <Head>
@@ -304,6 +385,7 @@ const ProjectPage: React.FC<ProjectPageProps> = ({ params }) => {
       </Head>
       <div>
         <Sidebar
+          handleCreateNewNote={handleCreateNewNote}
           handleCloseContext={handleCloseContext}
           selectedId={selectedId}
           selectedName={selectedName}
@@ -320,11 +402,13 @@ const ProjectPage: React.FC<ProjectPageProps> = ({ params }) => {
           selectedNote={selectedNote}
           setLoading={() => setIsLoading(true)}
           setSelectedNote={handleSetSelectedNote}
-          updatedConversations={handleGetConversations}
-          updatedDocuments={handleGetDocuments}
-          updatedNotes={handleGetNotes}
+          updatedConversations={updatedConversations}
+          updatedDocuments={updatedDocuments}
+          updatedNotes={updatedNotes}
           onOpenDialog={openDialog}
           params={params}
+          renameDocId={renameDocId}
+          setRenameDocId={setRenameId}
         />
       </div>
       <div className="flex flex-col w-full">
@@ -351,6 +435,7 @@ const ProjectPage: React.FC<ProjectPageProps> = ({ params }) => {
             </div>
           ) : (
             <WorkSpace
+            loadingCreateNote={loadingCreateNote}
             handleCloseContext={handleCloseContext}
             handleContextMenu={handleContextMenu}
               conversations={conversations}
@@ -367,6 +452,7 @@ const ProjectPage: React.FC<ProjectPageProps> = ({ params }) => {
           )}
         </div>
         <NewWorkspace
+        onSelectConversation={(convId: string) => {}}
           documents={documents}
           from="project"
           isOpen={isDialogOpen}
@@ -400,7 +486,7 @@ const ProjectPage: React.FC<ProjectPageProps> = ({ params }) => {
             <ListboxItem
               key="new"
               textValue="New file"
-              onClick={() => openNewDocument()}
+              onPress={() => openNewDocument()}
             >
               <div className="flex items-center">
                 <PlusIcon className="h-4 w-4 mr-2" />
@@ -410,7 +496,7 @@ const ProjectPage: React.FC<ProjectPageProps> = ({ params }) => {
             <ListboxItem
               key="popup"
               textValue="Pop Up"
-              // onClick={() => handleRouterDocument(selectedId)}
+              // onPress={() => handleRouterDocument(selectedId)}
             >
               <div className="flex items-center">
                 <ArrowTopRightOnSquareIcon className="h-4 w-4 mr-2" />
@@ -420,7 +506,7 @@ const ProjectPage: React.FC<ProjectPageProps> = ({ params }) => {
             <ListboxItem
               key="rename"
               textValue="Pop Up"
-              // onClick={() => handleOpenRename(selectedId)}
+              onPress={() => handleOpenRename(selectedId)}
             >
               <div className="flex items-center">
                 <PencilSquareIcon className="h-4 w-4 mr-2" />
@@ -433,7 +519,7 @@ const ProjectPage: React.FC<ProjectPageProps> = ({ params }) => {
               color="danger"
               textValue="Pop Up"
               role="button"
-              onClick={() => handleOpenDeleteDocument()}
+              onPress={() => handleOpenDeleteDocument()}
             >
               <div className="flex items-center">
                 <TrashIcon className="h-4 w-4 mr-2" />
@@ -460,7 +546,7 @@ const ProjectPage: React.FC<ProjectPageProps> = ({ params }) => {
             <ListboxItem key="popup" textValue="Pop Up">
               <div
                 className="flex items-center"
-                // onClick={() => handleRouterConversation(selectedId)}
+                // onPress={() => handleRouterConversation(selectedId)}
               >
                 <ArrowTopRightOnSquareIcon className="h-4 w-4 mr-2" />
                 {g('Detail')}
@@ -469,7 +555,7 @@ const ProjectPage: React.FC<ProjectPageProps> = ({ params }) => {
             <ListboxItem
               key="rename"
               textValue="Pop Up"
-              // onClick={() => handleOpenRename(selectedId)}
+              onPress={() => handleOpenRename(selectedId)}
             >
               <div className="flex items-center">
                 <PencilSquareIcon className="h-4 w-4 mr-2" />
@@ -502,7 +588,6 @@ const ProjectPage: React.FC<ProjectPageProps> = ({ params }) => {
               textValue="Pop Up"
               onPress={() => {
                 setContextMenu({ ...contextMenu, show: false });
-                // handleCreateNewNote();
                 handleCreateNewNote()
               }}
             >
@@ -514,7 +599,7 @@ const ProjectPage: React.FC<ProjectPageProps> = ({ params }) => {
             <ListboxItem
               key="popup"
               textValue="Pop Up"
-              onClick={() => {
+              onPress={() => {
                 setContextMenu({ ...contextMenu, show: false });
                 setSelectedNote(selectedId);
               }}
@@ -527,7 +612,7 @@ const ProjectPage: React.FC<ProjectPageProps> = ({ params }) => {
             <ListboxItem
               key="rename"
               textValue="Pop Up"
-              // onClick={() => handleOpenRename(selectedId)}
+              onPress={() => handleOpenRename(selectedId)}
             >
               <div className="flex items-center">
                 <PencilSquareIcon className="h-4 w-4 mr-2" />

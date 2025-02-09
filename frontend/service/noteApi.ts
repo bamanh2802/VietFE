@@ -19,7 +19,6 @@ export async function createNewNote(
     chunk_ids: chunkIds.join(","),
     formatted_text: formatted_text
   });
-  console.log(data)
 
   const response = await axios.post(`${API_URL}/api/projects/new-note`, data, {
     headers: {

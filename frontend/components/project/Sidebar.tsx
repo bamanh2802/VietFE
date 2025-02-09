@@ -1,9 +1,9 @@
 'use client'
 import React, { useState, useEffect } from "react";
+import { createPortal } from 'react-dom';
 import { useRouter } from "next/navigation";
 import {
   ChatBubbleBottomCenterIcon,
-  ExclamationCircleIcon,
 } from "@heroicons/react/24/outline";
 import {
   MagnifyingGlassIcon,
@@ -11,14 +11,9 @@ import {
   DocumentTextIcon,
   ChevronDownIcon,
   PlusIcon,
-  ArrowTopRightOnSquareIcon,
-  TrashIcon,
-  PencilSquareIcon,
   EllipsisHorizontalIcon,
-  ChatBubbleLeftIcon,
   WindowIcon,
 } from "@heroicons/react/24/outline";
-import { Listbox, ListboxItem } from "@nextui-org/listbox";
 import { Button } from "@nextui-org/button";
 import {Tooltip} from "@nextui-org/tooltip";
 import { useSelector, useDispatch } from "react-redux";
@@ -30,28 +25,18 @@ import {
   SelectItem,
   SelectValue,
 } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { RootState } from "@/src/store/store";
-import {
-  AlertDialog,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { setProjects } from "@/src/store/projectsSlice";
 import { Document, ImageType, Conversation, Note } from "@/src/types/types";
 import { ToastAction } from "@/components/ui/toast";
 import { getAllProjectsWithInfo } from "@/service/apis";
-import { createNewNote, deleteNote, renameNote } from "@/service/noteApi";
-import { renameConversation, deleteConversation } from "@/service/projectApi";
-import { renameDocument, deleteDocument } from "@/service/documentApi";
-
+import { createNewNote, renameNote } from "@/service/noteApi";
+import { renameConversation } from "@/service/projectApi";
+import { renameDocument } from "@/service/documentApi";
+import { Input, Textarea } from "@nextui-org/input";
 import { useTranslations } from 'next-intl';
-import { ListboxWrapper } from "../ListboxWrapper";
 
 interface SidebarProps {
   documents: Document[];
@@ -64,9 +49,9 @@ interface SidebarProps {
   onOpenDialog: () => void;
   openSearch: () => void;
   openNewDocument: () => void;
-  updatedDocuments: () => void;
-  updatedNotes: () => void;
-  updatedConversations: () => void;
+  updatedDocuments: (docId: string, newName: string) => void;
+  updatedNotes: (noteId: string, newName: string) => void;
+  updatedConversations: (convId: string, newName: string) => void;
   handleContextMenu: (e: React.MouseEvent, id: string, name: string) => void;
   handleClick: (e: React.MouseEvent, id: string, name: string) => void;
   handleClickOutside: (event: MouseEvent) => void;
@@ -79,7 +64,10 @@ interface SidebarProps {
     id: string;
   },
   params: { project_id: string }; 
-  handleCloseContext: () => void
+  handleCloseContext: () => void;
+  renameDocId: string;
+  setRenameDocId: (renameId: string) => void;
+  handleCreateNewNote: () => void
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
@@ -103,40 +91,52 @@ const Sidebar: React.FC<SidebarProps> = ({
   selectedName,
   contextMenu,
   handleCloseContext,
-  params
+  params,
+  renameDocId,
+  setRenameDocId,
+  handleCreateNewNote
 }) => {
   const router = useRouter();
   const { toast } = useToast();
   const projects = useSelector((state: RootState) => state.projects.projects);
   const [selectedProjectId, setSelectedProjectId] = useState<string>("");
-  const [isDeleteDocument, setIsDeleteDocument] = useState<boolean>(false);
   const [isLoadingProject, setIsLoadingProject] = useState<boolean>(true);
   const [expandedSections, setExpandedSections] = useState<string[]>([
-    "documents, conversation",
+    "documents", "conversation", "note"
   ]);
   const dispatch = useDispatch();
   const [isUploadDocs, setIsUploadDocs] = useState<boolean>(false);
-  // const [contextMenu, setContextMenu] = useState({
-  //   show: false,
-  //   x: 0,
-  //   y: 0,
-  //   id: "",
-  // });
   const { project_id } = params
-  const [renameDocId, setRenameDocId] = useState("");
   const [newDocumentName, setNewDocumentName] = useState("");
-  // const [selectedId, setSelectedId] = useState<string>("");
-  // const [selectedName, setSelectedName] = useState<string>("");
-  const [isLoadingDelete, setIsLoadingDelete] = useState<boolean>(false);
 
   const p = useTranslations('Project');
   const g = useTranslations('Global');
-  const handleOpenRename = (docId: string) => {
-    setRenameDocId(docId);
-    setNewDocumentName(selectedName);
-    handleCloseContext()
-  };
 
+
+  useEffect(() => {
+    if (selectedName) {
+      setNewDocumentName(selectedName)
+    }
+  }, [selectedName])
+
+  useEffect(() => {
+    if (!renameDocId) return; 
+  
+    let sectionToExpand = "";
+    
+    if (renameDocId.startsWith("doc-")) {
+      sectionToExpand = "documents";
+    } else if (renameDocId.startsWith("note-")) {
+      sectionToExpand = "note";
+    } else if (renameDocId.startsWith("conv-")) {
+      sectionToExpand = "conversation";
+    }
+  
+    if (sectionToExpand && !expandedSections.includes(sectionToExpand)) {
+      toggleExpand(sectionToExpand);
+    }
+  }, [renameDocId]);
+  
 
 
   const handleRename = async (id: string) => {
@@ -145,43 +145,47 @@ const Sidebar: React.FC<SidebarProps> = ({
         description: "Name is the same or empty. No changes made.",
       });
       setRenameDocId("");
-
-      return; 
+      return;
     }
+  
     toast({
       description: "Loading...",
     });
-
+  
     try {
       let data;
-
+  
       if (id.startsWith("doc-")) {
         data = await renameDocument(id, newDocumentName);
-        updatedDocuments();
+        updatedDocuments(id, newDocumentName);
       } else if (id.startsWith("note-")) {
         data = await renameNote(id, newDocumentName);
-        updatedNotes();
+        updatedNotes(id, newDocumentName);
       } else if (id.startsWith("conv-")) {
         data = await renameConversation(id, newDocumentName);
-        updatedConversations();
+        updatedConversations(id, newDocumentName);
       }
-
-
+  
       toast({
         description: "Rename Successfully!",
       });
-    } catch (e) {
-      console.log("Error during renaming:", e);
+    } catch (e: any) {
+      console.error("Error during renaming:", e);
+  
+      const errorMessage =
+        e?.response?.data?.message || e?.message || "There was a problem with your request.";
+  
       toast({
         variant: "destructive",
         title: "Uh oh! Something went wrong.",
-        description: "There was a problem with your request.",
+        description: errorMessage,
         action: <ToastAction altText="Try again">Try again</ToastAction>,
       });
     } finally {
       setRenameDocId("");
     }
   };
+  
 
  
 
@@ -199,9 +203,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     }
   }, [project_id, projects]);
 
-  const handleOpenDeleteDocument = () => {
-    setIsDeleteDocument(!isDeleteDocument);
-  };
+
   const handleGetProjects = async () => {
     try {
       const data = await getAllProjectsWithInfo();
@@ -211,39 +213,8 @@ const Sidebar: React.FC<SidebarProps> = ({
     }
   };
 
-  const handleCreateNewNote = async () => {
-    toast({
-      title: "Creating...",
-      description: "Waiting for create",
-    });
-  
-    try {
-      const data = await createNewNote(project_id as string);
-      setSelectedNote(data.data.note_id);
-  
-      toast({
-        title: "New note created successfully",
-        description: "Waiting for data loading",
-      });
-  
-      updatedNotes();
-    } catch (error: any) {
-      console.error("Error creating note:", error);
-  
-      const errorMessage =
-        error.response?.data?.message || "Something went wrong. Please try again.";
-  
-      toast({
-        title: "Error",
-        description: errorMessage,
-        variant: "destructive",
-      });
-    } finally {
-    }
-  };
   
   
-
   const getProjectNameById = (projectId: string | null) => {
     const project = projects?.find((proj) => proj.project_id === projectId);
 
@@ -269,7 +240,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   };
 
   const handleRouterConversation = (conversationId: string) => {
-    const url = `/project/${project_id}/workspace/${conversationId}`;
+    const url = `/project/${project_id}/conversation/${conversationId}`;
 
     window.open(url, "_blank");
   };
@@ -379,40 +350,60 @@ const Sidebar: React.FC<SidebarProps> = ({
                       handleContextMenu(e, doc.document_id, doc.document_name)
                     }
                   >
-                    <div className="truncate flex items-center w-40">
-                      {renameDocId === doc.document_id ? (
-                        <input
-                          autoFocus
-                          className="absolute left-0 w-full p-1 text-sm bg-white rounded shadow-md dark:bg-zinc-900 dark:border-zinc-700"
-                          type="text"
-                          value={newDocumentName}
-                          onBlur={() => handleRename(doc.document_id)}
-                          onChange={(e) => setNewDocumentName(e.target.value)}
-                          onClick={(e) => e.stopPropagation()}
-                          onKeyDown={(e) =>
-                            e.key === "Enter" && handleRename(doc.document_id)
-                          }
-                        />
-                      ) : (
-                        <Tooltip content={doc.document_name}>
-                          <div className="flex items-center w-full">
-                            <DocumentTextIcon className="w-4 h-4 mr-1" />
-                            <span className="truncate max-w-32">
-                              {doc.document_name}
-                            </span>
-                          </div>
-                        </Tooltip>
+                    <div className={` truncate flex flex-col items-center`}>
+                      <Tooltip content={doc.document_name}>
+                        <div 
+                          className="flex items-center w-full cursor-pointer" 
+                          onClick={() => setRenameDocId(doc.document_id)}
+                        >
+                          <DocumentTextIcon className="w-4 h-4 mr-1" />
+                          <span className={`truncate max-w-32`}>
+                            {doc.document_name}
+                          </span>
+                        </div>
+                      </Tooltip>
+
+                      {/* Rename Input Popup */}
+                      {renameDocId === doc.document_id && (
+                        <div className="top-full mt-1 w-40 z-50">
+                          <Textarea
+                            autoFocus
+                            className={`w-full bg-white dark:bg-zinc-800 shadow-lg rounded-lg text-base p-2`}
+                            size="sm"
+                            variant="bordered"
+                            value={newDocumentName}
+                            minRows={2}
+                            placeholder="Enter new name..."
+                            onBlur={() => handleRename(doc.document_id)}
+                            onChange={(e) => setNewDocumentName(e.target.value)}
+                            onClick={(e) => e.stopPropagation()}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter" && !e.shiftKey) {
+                                e.preventDefault();
+                                handleRename(doc.document_id);
+                              }
+                              if (e.key === "Escape") {
+                                setRenameDocId("");
+                              }
+                            }}
+                          />
+                        </div>
                       )}
                     </div>
-                    <Tooltip content="Thêm">
-                      <EllipsisHorizontalIcon
-                        className="transition-all w-4 h-4 opacity-0 group-hover:opacity-100"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleClick(e, doc.document_id, doc.document_name);
-                        }}
-                      />
-                    </Tooltip>
+                    
+                    {
+                      renameDocId !== doc.document_id && (
+                        <Tooltip content="Thêm">
+                          <EllipsisHorizontalIcon
+                            className="transition-all w-4 h-4 opacity-0 group-hover:opacity-100"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleClick(e, doc.document_id, doc.document_name);
+                            }}
+                          />
+                        </Tooltip>
+                      )
+                    }
                   </div>
                 ))}
                 <div
@@ -516,46 +507,62 @@ const Sidebar: React.FC<SidebarProps> = ({
                       )
                     }
                   >
-                    <div className="truncate flex items-center w-40">
-                      {renameDocId === conversation.conversation_id ? (
-                        <input
-                          autoFocus
-                          className="absolute left-0 w-full p-1 text-sm bg-white rounded shadow-md dark:bg-zinc-900 dark:border-zinc-700"
-                          type="text"
-                          value={newDocumentName}
-                          onBlur={() =>
-                            handleRename(conversation.conversation_id)
-                          }
-                          onChange={(e) => setNewDocumentName(e.target.value)}
-                          onClick={(e) => e.stopPropagation()}
-                          onKeyDown={(e) =>
-                            e.key === "Enter" &&
-                            handleRename(conversation.conversation_id)
-                          }
-                        />
-                      ) : (
-                        <Tooltip content={conversation.conversation_name}>
-                          <div className="flex items-center w-full">
-                            <ChatBubbleBottomCenterIcon className="w-4 h-4 mr-1" />
-                            <span className="truncate max-w-32">
+                    <div className="truncate flex flex-col items-center">
+                      <Tooltip content={conversation.conversation_name}>
+                          <div 
+                            className="flex items-center w-full cursor-pointer" 
+                            onClick={() => setRenameDocId(conversation.conversation_id)}
+                          >
+                            <DocumentTextIcon className="w-4 h-4 mr-1" />
+                            <span className={`truncate max-w-32`}>
                               {conversation.conversation_name}
                             </span>
                           </div>
                         </Tooltip>
-                      )}
+                      {renameDocId === conversation.conversation_id && (
+                        <div className="top-full mt-1 w-40 z-50">
+                          <Textarea
+                            autoFocus
+                            className={`w-full bg-white dark:bg-zinc-800 shadow-lg rounded-lg text-base p-2`}
+                            size="sm"
+                            variant="bordered"
+                            value={newDocumentName}
+                            minRows={2}
+                            placeholder="Enter new name..."
+                            onBlur={() => handleRename(conversation.conversation_id)}
+                            onChange={(e) => setNewDocumentName(e.target.value)}
+                            onClick={(e) => e.stopPropagation()}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter" && !e.shiftKey) {
+                                e.preventDefault();
+                                handleRename(conversation.conversation_id);
+                              }
+                              if (e.key === "Escape") {
+                                setRenameDocId("");
+                              }
+                            }}
+                          />
+                        </div>
+                      ) }
                     </div>
-                    <Tooltip content="Thêm">
-                      <EllipsisHorizontalIcon
-                        className="transition-all w-4 h-4 opacity-0 group-hover:opacity-100"
-                        onClick={(e) =>
-                          handleClick(
-                            e,
-                            conversation.conversation_id,
-                            conversation.conversation_name,
-                          )
-                        }
-                      />
-                    </Tooltip>
+                    {
+                      renameDocId !== conversation.conversation_id && (
+                        <Tooltip content="Thêm">
+                          <EllipsisHorizontalIcon
+                            className="transition-all w-4 h-4 opacity-0 group-hover:opacity-100"
+                            onClick={(e) =>
+                              {
+                                e.stopPropagation();
+                                handleClick(
+                                e,
+                                conversation.conversation_id,
+                                conversation.conversation_name,
+                              )}
+                            }
+                          />
+                        </Tooltip>
+                      )
+                    }
                   </div>
                 ))}
                 <div
@@ -607,45 +614,66 @@ const Sidebar: React.FC<SidebarProps> = ({
                         handleContextMenu(e, note.note_id, note.title)
                       }
                     >
-                      <div className="flex justify-center items-center">
-                        {renameDocId === note.note_id ? (
-                          <input
+                      <div className="truncate flex flex-col items-center">
+                        <Tooltip content={note.title}>
+                          <div 
+                            className="flex items-center w-full cursor-pointer" 
+                            onClick={() => setRenameDocId(note.note_id)}
+                          >
+                            <DocumentTextIcon className="w-4 h-4 mr-1" />
+                              {note.title === null ? (
+                                  <span className="truncate max-w-32">
+                                    No Name
+                                  </span>
+                                ) : (
+                                  <span className="truncate max-w-32">
+                                    {note.title}
+                                  </span>
+                                )}
+                          </div>
+                        </Tooltip>
+                        {renameDocId === note.note_id && (
+                      
+                          <div className="top-full mt-1 w-40 z-50">
+                          <Textarea
                             autoFocus
-                            className="absolute left-0 w-full p-1 text-sm bg-white rounded shadow-md dark:bg-zinc-900 dark:border-zinc-700"
-                            type="text"
+                            className={`w-full bg-white dark:bg-zinc-800 shadow-lg rounded-lg text-base p-2`}
+                            size="sm"
+                            variant="bordered"
                             value={newDocumentName}
+                            minRows={2}
+                            placeholder="Enter new name..."
                             onBlur={() => handleRename(note.note_id)}
                             onChange={(e) => setNewDocumentName(e.target.value)}
                             onClick={(e) => e.stopPropagation()}
-                            onKeyDown={(e) =>
-                              e.key === "Enter" && handleRename(note.note_id)
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter" && !e.shiftKey) {
+                                e.preventDefault();
+                                handleRename(note.note_id);
+                              }
+                              if (e.key === "Escape") {
+                                setRenameDocId("");
+                              }
+                            }}
+                          />
+                        </div>
+                        ) }
+                      </div>
+                     {
+                      renameDocId !== note.note_id && (
+                        <Tooltip content="Thêm">
+                          <EllipsisHorizontalIcon
+                            className="transition-all w-4 h-4 opacity-0 group-hover:opacity-100"
+                            onClick={(e) =>
+                              {
+                                e.stopPropagation();
+                                handleClick(e, note.note_id, note.title)
+                              }
                             }
                           />
-                        ) : (
-                          <Tooltip content={note.title}>
-                            <div className="flex items-center w-full">
-                              <WindowIcon className="w-4 h-4 mr-1" />
-                              {note.title === null ? (
-                                <span className="truncate max-w-32">
-                                  No Name
-                                </span>
-                              ) : (
-                                <span className="truncate max-w-32">
-                                  {note.title}
-                                </span>
-                              )}
-                            </div>
-                          </Tooltip>
-                        )}
-                      </div>
-                      <Tooltip content="Thêm">
-                        <EllipsisHorizontalIcon
-                          className="transition-all w-4 h-4 opacity-0 group-hover:opacity-100"
-                          onClick={(e) =>
-                            handleClick(e, note.note_id, note.title)
-                          }
-                        />
                       </Tooltip>
+                      )
+                     }
                     </div>
                   );
                 })}

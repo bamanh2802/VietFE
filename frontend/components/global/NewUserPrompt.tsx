@@ -1,23 +1,21 @@
-"use client";
+"use client"
 
-import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import { ArrowUpRight } from "lucide-react";
-
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { useState, useEffect } from "react"
+import { motion } from "framer-motion"
+import { ArrowUpRight } from "lucide-react"
+import { Card, CardBody, Button } from "@nextui-org/react"
 
 export default function NewUserPrompt() {
-  const [isVisible, setIsVisible] = useState(false);
+  const [isVisible, setIsVisible] = useState(false)
 
   useEffect(() => {
     // Simulate a delay before showing the prompt
-    const timer = setTimeout(() => setIsVisible(true), 1000);
+    const timer = setTimeout(() => setIsVisible(true), 1000)
 
-    return () => clearTimeout(timer);
-  }, []);
+    return () => clearTimeout(timer)
+  }, [])
 
-  if (!isVisible) return null;
+  if (!isVisible) return null
 
   return (
     <motion.div
@@ -26,36 +24,27 @@ export default function NewUserPrompt() {
       initial={{ opacity: 0, y: 50 }}
       transition={{ duration: 0.5 }}
     >
-      <Card className="w-72">
-        <CardContent className="p-4">
-          <motion.div
-            animate={{ scale: [1, 1.03, 1] }}
-            transition={{ repeat: Infinity, duration: 2 }}
-          >
-            <h3 className="text-lg font-semibold mb-2">
-              Welcome to our platform!
-            </h3>
-            <p className="text-sm text-gray-600 mb-4">
-              To get started, create your first project by clicking the button
-              in the top right corner.
+      <Card className="w-72 bg-white dark:bg-zinc-900">
+        <CardBody className="p-4">
+          <motion.div animate={{ scale: [1, 1.03, 1] }} transition={{ repeat: Number.POSITIVE_INFINITY, duration: 2 }}>
+            <h3 className="text-lg font-semibold mb-2 text-zinc-900 dark:text-zinc-100">Welcome to our platform!</h3>
+            <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-4">
+              To get started, create your first project by clicking the button in the top right corner.
             </p>
-            <Button
-              className="w-full"
-              variant="outline"
-              onClick={() => setIsVisible(false)}
-            >
+            <Button className="w-full" variant="bordered" onPress={() => setIsVisible(false)}>
               Got it!
             </Button>
           </motion.div>
-        </CardContent>
+        </CardBody>
       </Card>
       <motion.div
         animate={{ x: [0, 10, 0], y: [0, -10, 0] }}
         className="absolute -top-12 -right-8"
-        transition={{ repeat: Infinity, duration: 1.5 }}
+        transition={{ repeat: Number.POSITIVE_INFINITY, duration: 1.5 }}
       >
-        <ArrowUpRight className="text-primary w-12 h-12" />
+        <ArrowUpRight className="text-primary-600 dark:text-primary-400 w-12 h-12" />
       </motion.div>
     </motion.div>
-  );
+  )
 }
+

@@ -7,6 +7,7 @@ import {
   ChatBubbleLeftRightIcon,
   PlusIcon,
 } from "@heroicons/react/24/outline";
+import { Loader2 } from 'lucide-react';
 import {Tooltip} from "@nextui-org/tooltip";
 import {Skeleton} from "@nextui-org/skeleton";
 import {Avatar} from "@nextui-org/avatar";
@@ -34,7 +35,8 @@ interface WorkSpaceProps {
   updatedNotes: () => void;
   handleCloseContext: () => void
   handleContextMenu: (e: React.MouseEvent, id: string, name: string) => void;
-  handleCreateNewNote: () => void
+  handleCreateNewNote: () => void;
+  loadingCreateNote: boolean
 }
 const WorkSpace: React.FC<WorkSpaceProps> = ({
   updatedNotes,
@@ -48,7 +50,8 @@ const WorkSpace: React.FC<WorkSpaceProps> = ({
   notes,
   handleContextMenu,
   handleCloseContext,
-  handleCreateNewNote
+  handleCreateNewNote,
+  loadingCreateNote
 }) => {
   const { toast } = useToast();
   const handleRouterWorkspace = (conversationId: string) => {
@@ -270,17 +273,21 @@ const WorkSpace: React.FC<WorkSpaceProps> = ({
           <div className="">
             <Carousel>
               <CarouselContent>
-                <CarouselItem
-                  key="plus"
-                  className="cursor-pointer shadow-none basis-1/5 hover:scale-[1.01] transition-all"
-                  onClick={handleCreateNewNote}
-                >
-                  <Tooltip content="Add new Note">
-                    <Card className="shadow-none bg-opacity-0 max-w-[180px] h-[113px] flex justify-center items-center">
-                      <PlusIcon className="w-h-16 h-16" />
-                    </Card>
-                  </Tooltip>
-                </CarouselItem>
+              <CarouselItem
+                key="plus"
+                className="cursor-pointer shadow-none basis-1/5 hover:scale-[1.01] transition-all"
+                onClick={handleCreateNewNote}
+              >
+                <Tooltip content="Add new Note">
+                  <Card className="shadow-none bg-opacity-0 max-w-[180px] h-[113px] flex justify-center items-center">
+                    {loadingCreateNote ? (
+                      <Loader2 className="w-16 h-16 animate-spin" />
+                    ) : (
+                      <PlusIcon className="w-16 h-16" />
+                    )}
+                  </Card>
+                </Tooltip>
+              </CarouselItem>
                 {notes &&
                   notes.map((note, index) => (
                     <CarouselItem

@@ -38,9 +38,11 @@ import NewWorkspace from "../workspace/NewWorkspace";
 
 
 interface SidebarWorkspaceProps {
-  onSelectConversation: (conv: Conversation) => void;
+  updatedDeleteConversations: (convId: string) => void
+  getConversation: () => void
+  onSelectConversation: (convId: string) => void;
   conversations: Conversation[];
-  updatedConversations: () => void;
+  updatedConversations: (convId: string, newName: string) => void;
   projectId: string;
   params: { project_id: string, conversation_id: string }
   isOpen: boolean,
@@ -48,6 +50,8 @@ interface SidebarWorkspaceProps {
 }
 
 const SidebarWorkspace: FC<SidebarWorkspaceProps> = ({
+  updatedDeleteConversations,
+  getConversation,
   onSelectConversation,
   conversations,
   updatedConversations,
@@ -96,16 +100,19 @@ const SidebarWorkspace: FC<SidebarWorkspaceProps> = ({
 
   const handleToggleNewConversation = () =>
     setOpenNewConversation(!openNewConversation);
+
+
+
   const handleDelete = async () => {
     setSelectedConversationId("");
     setIsLoading(true);
     try {
-      const data = await deleteConversation(conversation_id as string);
+      await deleteConversation(selectedConversationId);
 
       toast({
         description: "Delete Successfully!",
       });
-      updatedConversations();
+      updatedDeleteConversations(selectedConversationId)
     } catch (e) {
       console.log(e);
       toast({
@@ -118,6 +125,7 @@ const SidebarWorkspace: FC<SidebarWorkspaceProps> = ({
     handleOpenDeleteConversation();
     setIsLoading(false);
   };
+
 
   const handleGetDocuments = async () => {
     try {
@@ -144,7 +152,7 @@ const SidebarWorkspace: FC<SidebarWorkspaceProps> = ({
     });
     try {
       await renameConversation(id, newName);
-      updatedConversations();
+      updatedConversations(id, newName);
       toast({
         description: "Rename Successfully!",
       });
@@ -201,7 +209,7 @@ const SidebarWorkspace: FC<SidebarWorkspaceProps> = ({
       );
 
       if (selectedConv) {
-        onSelectConversation(selectedConv);
+        onSelectConversation(selectedConv.conversation_id);
       }
     }
   }, [consersationId, conversations]);
@@ -225,7 +233,7 @@ const SidebarWorkspace: FC<SidebarWorkspaceProps> = ({
                   ? "bg-zinc-300 dark:bg-zinc-700 text-white" // Highlight selected conversation
                   : "text-gray-700 dark:text-gray-400 hover:bg-zinc-200 dark:hover:bg-zinc-800"
               }`}
-              onClick={() => onSelectConversation(conv)}
+              onClick={() => onSelectConversation(conv.conversation_id)}
               onContextMenu={(e) =>
                 handleContextMenu(
                   e,
@@ -407,12 +415,14 @@ const SidebarWorkspace: FC<SidebarWorkspaceProps> = ({
       </Modal>
 
       <NewWorkspace
+      onSelectConversation={onSelectConversation}
         documents={documents as Document[]}
         from="conversation"
         isOpen={openNewConversation}
         projectId={project_id as string}
-        updateConversation={updatedConversations}
+        updateConversation={getConversation}
         onClose={handleToggleNewConversation}
+        
       />
       <SearchComponent
         conversations={conversations as Conversation[]}

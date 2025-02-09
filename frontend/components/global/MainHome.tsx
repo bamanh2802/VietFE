@@ -314,7 +314,7 @@ const HomeMain: React.FC<HomeMainProps> = ({
       {initialProjects !== undefined && initialProjects?.length === 0 ? (
         <>
           <div
-            className={`animate-bounce text-center transition-opacity duration-1000 mt-60`}
+            className={`text-center transition-opacity duration-1000 mt-60`}
           >
             <h2 className="text-3xl font-bold text-gray-800 mb-4">
               Viet – Trợ lý AI hỗ trợ quản lý và nghiên cứu tri thức hiệu quả
