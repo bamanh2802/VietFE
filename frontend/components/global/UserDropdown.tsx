@@ -1,6 +1,12 @@
 'use client'
 import React, { useEffect, useState } from "react";
-import { Dropdown, DropdownTrigger, DropdownMenu, DropdownSection, DropdownItem } from "@nextui-org/dropdown";
+import {
+  Dropdown,
+  DropdownTrigger,
+  DropdownMenu,
+  DropdownSection,
+  DropdownItem
+} from "@nextui-org/dropdown";
 import { useRouter } from "next/navigation";
 import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@nextui-org/modal";
 import { useDispatch, useSelector } from "react-redux";
