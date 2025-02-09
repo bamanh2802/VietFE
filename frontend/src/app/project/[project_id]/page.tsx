@@ -373,9 +373,35 @@ const ProjectPage: React.FC<ProjectPageProps> = ({ params }) => {
   }
 
   const updatedDeleteNotes = (noteId: string) => {
-    setNotes(prevNotes => prevNotes.filter(note => note.note_id !== noteId))
-  }
+    setNotes(prevNotes => {
+      const updatedNotes = prevNotes.filter(note => note.note_id !== noteId);
+      
+      if (updatedNotes.length > 0) {
+        handleSetSelectedNote(updatedNotes[0].note_id);
+      } else {
+        router.push(`/project/${project_id}`);
+        handleSetSelectedNote("")
+      }
+      
+      return updatedNotes;
+    });
+  };
+  
 
+
+  const handleRouterDocument = (docId: string) => {
+    handleCloseContext()
+    const url = `/project/${project_id}/document/${docId}`;
+
+    window.open(url, "_blank");
+  };
+
+  const handleRouterConversation = (conversationId: string) => {
+    handleCloseContext()
+    const url = `/project/${project_id}/conversation/${conversationId}`;
+
+    window.open(url, "_blank");
+  };
   
 
   return (
@@ -496,7 +522,7 @@ const ProjectPage: React.FC<ProjectPageProps> = ({ params }) => {
             <ListboxItem
               key="popup"
               textValue="Pop Up"
-              // onPress={() => handleRouterDocument(selectedId)}
+              onPress={() => handleRouterDocument(selectedId)}
             >
               <div className="flex items-center">
                 <ArrowTopRightOnSquareIcon className="h-4 w-4 mr-2" />
@@ -546,7 +572,7 @@ const ProjectPage: React.FC<ProjectPageProps> = ({ params }) => {
             <ListboxItem key="popup" textValue="Pop Up">
               <div
                 className="flex items-center"
-                // onPress={() => handleRouterConversation(selectedId)}
+                onClick={() => handleRouterConversation(selectedId)}
               >
                 <ArrowTopRightOnSquareIcon className="h-4 w-4 mr-2" />
                 {g('Detail')}
@@ -601,7 +627,7 @@ const ProjectPage: React.FC<ProjectPageProps> = ({ params }) => {
               textValue="Pop Up"
               onPress={() => {
                 setContextMenu({ ...contextMenu, show: false });
-                setSelectedNote(selectedId);
+                handleSetSelectedNote(selectedId);
               }}
             >
               <div className="flex items-center">

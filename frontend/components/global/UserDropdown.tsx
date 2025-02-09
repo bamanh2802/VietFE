@@ -1,11 +1,24 @@
 'use client'
 import React, { useEffect, useState } from "react";
-import {  Dropdown,  DropdownTrigger,  DropdownMenu,  DropdownSection,  DropdownItem} from "@nextui-org/dropdown";
+import { 
+  Dropdown, 
+  DropdownTrigger, 
+  DropdownMenu, 
+  DropdownSection, 
+  DropdownItem
+} from "@nextui-org/dropdown";
 import { useRouter } from "next/navigation";
-import {  Modal,  ModalContent,  ModalHeader,  ModalBody,  ModalFooter} from "@nextui-org/modal";
+import {  
+  Modal,  
+  ModalContent,  
+  ModalHeader,  
+  ModalBody,  
+  ModalFooter,
+  Button
+} from "@nextui-org/react";
 import { useDispatch, useSelector } from "react-redux";
 import dynamic from "next/dynamic";
-import {Avatar} from "@nextui-org/avatar";
+import { Avatar } from "@nextui-org/avatar";
 import { Logout, getUser } from "@/service/apis";
 import { RootState } from "@/src/store/store";
 import { setUser, clearUser } from "@/src/store/userSlice";
@@ -24,16 +37,10 @@ const UserDropdown = () => {
   const router = useRouter();
   const dispatch = useDispatch();
   const user = useSelector((state: RootState) => state.user);
-  const [openSetting, setOpenSetting] = useState<boolean>(false);
-  const [isFeedbackOpen, setFeedbackOpen] = useState<boolean>(false);
-
-  const handleToggleSetting = () => setOpenSetting(!openSetting);
-  const handleToggleFeedback = () => setFeedbackOpen(!isFeedbackOpen);
-  const handleOpenFeedback = () => {
-    setFeedbackOpen(true);
-    // Đóng dropdown khi mở modal feedback
-    document.body.click();
-  };
+  const [openSetting, setOpenSetting] = useState(false);
+  const [isFeedbackOpen, setFeedbackOpen] = useState(false);
+  const [isLogoutModalOpen, setLogoutModalOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   useEffect(() => {
     if (!user.user_id) {
@@ -44,7 +51,7 @@ const UserDropdown = () => {
   const handleGetUser = async () => {
     try {
       const data = await getUser();
-      if (data && data.data && data.data.msg) {
+      if (data?.data?.msg) {
         dispatch(setUser(data.data.msg));
       } else {
         console.error("Invalid user data received");
@@ -55,22 +62,22 @@ const UserDropdown = () => {
   };
 
   const handleLogout = async () => {
+    setIsLoggingOut(true);
     try {
       await Logout();
-      dispatch(clearUser())
-      dispatch(clearProjects())
-      dispatch(clearDocuments())
-      dispatch(clearConversations())
+      dispatch(clearUser());
+      dispatch(clearProjects());
+      dispatch(clearDocuments());
+      dispatch(clearConversations());
       localStorage.removeItem("access_token");
       router.push("/");
     } catch (e) {
       console.error("Error during logout:", e);
+      alert("Failed to log out. Please try again.");
+    } finally {
+      setIsLoggingOut(false);
+      setLogoutModalOpen(false);
     }
-  };
-
-  const handleFeedbackSubmit = (feedback: string) => {
-    console.log("Feedback submitted:", feedback);
-    // Xử lý gửi feedback ở đây
   };
 
   return (
@@ -91,27 +98,25 @@ const UserDropdown = () => {
             <p className="font-semibold">Signed in as</p>
             <p className="font-semibold">{user?.email}</p>
           </DropdownItem>
-          <DropdownItem textValue="settings" key="settings" onPress={handleToggleSetting}>
+          <DropdownItem textValue="settings" key="settings" onPress={() => setOpenSetting(true)}>
             Settings
           </DropdownItem>
           <DropdownItem textValue="analytics" key="analytics">Analytics</DropdownItem>
-          <DropdownItem textValue="help_and_feedback" key="help_and_feedback" onPress={handleOpenFeedback}>
+          <DropdownItem textValue="help_and_feedback" key="help_and_feedback" onPress={() => setFeedbackOpen(true)}>
             Help & Feedback
           </DropdownItem>
-          <DropdownItem textValue="logout" key="logout" color="danger" onPress={handleLogout}>
+          <DropdownItem textValue="logout" key="logout" color="danger" onPress={() => setLogoutModalOpen(true)}>
             Log Out
           </DropdownItem>
         </DropdownMenu>
       </Dropdown>
 
-      <Modal isOpen={openSetting} size="5xl" onOpenChange={handleToggleSetting}>
+      <Modal isOpen={openSetting} size="5xl" onOpenChange={setOpenSetting}>
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader className="flex flex-col gap-1">
-                User Setting
-              </ModalHeader>
-              <ModalBody className="max-w-none">
+              <ModalHeader className="flex flex-col gap-1">User Setting</ModalHeader>
+              <ModalBody>
                 <AccountSettings updateData={handleGetUser} user={user} />
               </ModalBody>
             </>
@@ -122,10 +127,27 @@ const UserDropdown = () => {
       {isFeedbackOpen && (
         <Feedback
           open={isFeedbackOpen}
-          onClose={handleToggleFeedback}
-          onSubmit={handleFeedbackSubmit}
+          onClose={() => setFeedbackOpen(false)}
+          onSubmit={(feedback) => console.log("Feedback submitted:", feedback)}
         />
       )}
+
+      <Modal isOpen={isLogoutModalOpen} onOpenChange={setLogoutModalOpen}>
+        <ModalContent>
+          <ModalHeader>Confirm Logout</ModalHeader>
+          <ModalBody>
+            <p>Are you sure you want to log out?</p>
+          </ModalBody>
+          <ModalFooter>
+            <Button onPress={() => setLogoutModalOpen(false)} disabled={isLoggingOut}>
+              Cancel
+            </Button>
+            <Button color="danger" onPress={handleLogout} isLoading={isLoggingOut}>
+              Log Out
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </>
   );
 };
