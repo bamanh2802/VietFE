@@ -64,13 +64,13 @@ const UserDropdown = () => {
   const handleLogout = async () => {
     setIsLoggingOut(true);
     try {
-      router.push("/");
       await Logout();
       dispatch(clearUser());
       dispatch(clearProjects());
       dispatch(clearDocuments());
       dispatch(clearConversations());
       localStorage.removeItem("access_token");
+      router.push("/");
     } catch (e) {
       console.error("Error during logout:", e);
       alert("Failed to log out. Please try again.");
