@@ -3,6 +3,8 @@ Viet - Trợ Lý AI Quản Lý Tri Thức
  Trang web: vietmind.ai.vn
 
 Giới Thiệu
+[🎥 Xem Demo](https://drive.google.com/file/d/1TzcfY6CAIjKBQXINcrzoEijBd_rmj81T/view?usp=sharing)
+
 
 Viet là một trợ lý AI được thiết kế để hỗ trợ người dùng hoặc nhóm trong việc quản lý và nghiên cứu tri thức. Dự án bao gồm các tính năng chính:
 
